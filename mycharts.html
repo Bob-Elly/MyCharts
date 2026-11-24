@@ -10,39 +10,56 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-192.png">
 <style>
-*{box-sizing:border-box;margin:0}
-html,body{height:100%;background:#0e1117;color:#c9ced8;font:13px system-ui,-apple-system,Segoe UI,sans-serif;overflow:hidden;user-select:none}
-#app{display:grid;grid-template-columns:50px 1fr 240px;grid-template-rows:42px 1fr;height:100%;transition:grid-template-columns .2s ease}
-#app.wl-collapsed{grid-template-columns:50px 1fr 0px}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;width:100%;background:#0e1117;color:#c9ced8;font:13px system-ui,-apple-system,Segoe UI,sans-serif;overflow:hidden;user-select:none}
+#app{display:grid;grid-template-columns:48px 1fr 240px;grid-template-rows:42px 1fr;height:100%;width:100%;transition:grid-template-columns .2s ease}
+#app.wl-collapsed{grid-template-columns:48px 1fr 0px}
 
-/* Top bar */
-#top{grid-column:1/4;display:flex;align-items:center;gap:6px;padding:0 8px;background:#151a23;border-bottom:1px solid #232a36;overflow-x:auto;white-space:nowrap;z-index:4}
+/* Top Navigation Bar */
+#top{grid-column:1/4;display:flex;align-items:center;gap:6px;padding:0 8px;background:#151a23;border-bottom:1px solid #232a36;overflow-x:auto;white-space:nowrap;z-index:10}
 #brand{display:flex;align-items:center;gap:6px;font-weight:700;font-size:14px;letter-spacing:-0.2px;padding-right:10px;border-right:1px solid #232a36;flex-shrink:0;cursor:pointer}
 #brand svg{flex-shrink:0}
 
+/* Symbol selector container with autocomplete */
+#sym-box{position:relative;display:flex;align-items:center}
+#sym{width:110px;font-weight:600;padding:4px 8px;cursor:pointer}
+#sym-search-dropdown{position:absolute;top:calc(100% + 4px);left:0;width:320px;max-height:420px;background:#151a23;border:1px solid #2a3342;border-radius:8px;box-shadow:0 12px 36px rgba(0,0,0,.7);z-index:100;display:flex;flex-direction:column;overflow:hidden}
+#sym-search-dropdown[hidden]{display:none}
+#search-input-wrap{padding:8px;border-bottom:1px solid #232a36;background:#181e28}
+#search-input{width:100%;padding:6px 10px;font-size:12px;background:#11151c;border:1px solid #2a3342;border-radius:5px;color:#fff}
+#search-tabs{display:flex;gap:4px;padding:6px 8px;border-bottom:1px solid #232a36;background:#131822}
+.stab{padding:3px 8px;font-size:11px;border-radius:4px;cursor:pointer;background:transparent;border:none;color:#9aa3b2}
+.stab.on{background:#2962ff;color:#fff}
+#search-results{flex:1;overflow-y:auto;display:flex;flex-direction:column;max-height:300px}
+.s-item{display:flex;align-items:center;gap:8px;padding:8px 10px;cursor:pointer;border-bottom:1px solid #1a202c;transition:background .15s}
+.s-item:hover{background:#1d2430}
+.s-item .s-sym{font-weight:600;color:#fff;font-size:12px}
+.s-item .s-desc{font-size:11px;color:#8a919e;flex:1}
+.s-item .s-tag{font-size:10px;padding:2px 5px;border-radius:3px;background:#232a36;color:#9aa3b2;text-transform:uppercase}
+
 /* Left Tools Toolbar (TradingView style) */
-#tools{background:#151a23;border-right:1px solid #232a36;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0;overflow-y:auto;z-index:3}
+#tools{background:#151a23;border-right:1px solid #232a36;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0;overflow-y:auto;z-index:5}
 #tools button,#tools .tool-btn{width:36px;height:34px;padding:0;display:flex;align-items:center;justify-content:center;border-radius:6px;border:1px solid transparent;background:transparent;color:#9aa3b2;cursor:pointer;transition:all .15s ease}
 #tools button:hover{background:#1d2430;color:#fff}
 #tools button.on{background:#2962ff;border-color:#2962ff;color:#fff;box-shadow:0 0 10px rgba(41,98,255,.45)}
 #tools .sep{width:26px;height:1px;background:#232a36;margin:3px 0}
 #tools select{width:38px;padding:2px;font-size:11px}
-#tools input[type=color]{width:34px;height:24px;padding:0;border:none;border-radius:4px;cursor:pointer}
+#tools input[type=color]{width:32px;height:22px;padding:0;border:none;border-radius:4px;cursor:pointer}
 
 /* Center chart canvas */
-#cw{position:relative;min-width:0;height:100%;overflow:hidden}
-#cv{position:absolute;inset:0;cursor:crosshair;touch-action:none}
-#ohlc{position:absolute;left:10px;top:8px;font-size:12px;pointer-events:none;color:#9aa3b2;display:flex;gap:8px;align-items:center;background:rgba(21,26,35,.75);padding:3px 8px;border-radius:4px;backdrop-filter:blur(4px)}
+#cw{position:relative;width:100%;height:100%;overflow:hidden;background:#0e1117}
+#cv{position:absolute;left:0;top:0;width:100%;height:100%;cursor:crosshair;touch-action:none}
+#ohlc{position:absolute;left:10px;top:8px;font-size:12px;pointer-events:none;color:#9aa3b2;display:flex;gap:8px;align-items:center;background:rgba(21,26,35,.8);padding:3px 8px;border-radius:4px;backdrop-filter:blur(4px);z-index:2}
 
 /* Right Watchlist Panel */
-#wl{background:#151a23;border-left:1px solid #232a36;display:flex;flex-direction:column;height:100%;overflow:hidden;z-index:3}
+#wl{background:#151a23;border-left:1px solid #232a36;display:flex;flex-direction:column;height:100%;overflow:hidden;z-index:5}
 #wl-head{display:flex;align-items:center;gap:6px;padding:8px;border-bottom:1px solid #232a36;background:#181e28}
 #wl-head span{font-weight:600;font-size:12px;color:#fff;flex:1}
 #wi{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:1px;padding:4px}
 .wi{display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:6px;cursor:pointer;transition:background .15s ease;font-size:12px}
 .wi:hover{background:#1d2430}
 .wi.active{background:#1e2738;border:1px solid #2962ff}
-.wi .sym-icon{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:10px;color:#fff;flex-shrink:0}
+.sym-icon{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:10px;color:#fff;flex-shrink:0}
 .wi .sym-info{display:flex;flex-direction:column;flex:1;min-width:0}
 .wi .sym-name{font-weight:600;color:#e1e5ee;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .wi .sym-src{font-size:10px;color:#6b7280;text-transform:uppercase}
@@ -72,7 +89,7 @@ button.on{background:#2962ff;border-color:#2962ff;color:#fff}
 #set p{font-size:12px;color:#8a919e;margin-top:12px;line-height:1.4}
 
 /* Bar replay float */
-#rp{position:absolute;left:50%;transform:translateX(-50%);bottom:30px;display:flex;flex-wrap:wrap;gap:5px;align-items:center;justify-content:center;background:rgba(21,26,35,.94);border:1px solid #2a3342;border-radius:8px;padding:6px 10px;max-width:96%;font-size:12px;box-shadow:0 8px 24px rgba(0,0,0,.45)}
+#rp{position:absolute;left:50%;transform:translateX(-50%);bottom:30px;display:flex;flex-wrap:wrap;gap:5px;align-items:center;justify-content:center;background:rgba(21,26,35,.94);border:1px solid #2a3342;border-radius:8px;padding:6px 10px;max-width:96%;font-size:12px;box-shadow:0 8px 24px rgba(0,0,0,.45);z-index:20}
 #rp[hidden]{display:none}
 
 /* Mobile responsive */
@@ -111,12 +128,28 @@ button.on{background:#2962ff;border-color:#2962ff;color:#fff}
   </svg>
   <span><span style="color:#fff">My</span><span style="color:#2962ff">Charts</span></span>
  </div>
+ 
  <select id="src">
   <option value="gate">Gate.io</option>
   <option value="bn">Binance</option>
   <option value="fx">Forex</option>
  </select>
- <input id="sym" size="10" spellcheck="false">
+ 
+ <div id="sym-box">
+  <input id="sym" spellcheck="false" title="Click to search symbol">
+  <div id="sym-search-dropdown" hidden>
+   <div id="search-input-wrap">
+    <input id="search-input" placeholder="Search pairs (e.g. BTC, Solana, EUR, Gold)..." spellcheck="false">
+   </div>
+   <div id="search-tabs">
+    <button class="stab on" data-cat="all">All</button>
+    <button class="stab" data-cat="crypto">Crypto</button>
+    <button class="stab" data-cat="fx">Forex & Metals</button>
+   </div>
+   <div id="search-results"></div>
+  </div>
+ </div>
+
  <span id="tfs"></span>
  <input id="ctf" size="9" placeholder="custom: 7m" spellcheck="false">
  <button id="rpbtn" title="Bar replay">⏪ Replay</button>
@@ -190,10 +223,14 @@ const NB={1:'1m',3:'3m',5:'5m',15:'15m',30:'30m',60:'1h',120:'2h',240:'4h',360:'
 const NF={1:'1min',5:'5min',15:'15min',30:'30min',45:'45min',60:'1h',120:'2h',240:'4h',1440:'1day',10080:'1week',43200:'1month'};
 const FAV=['1m','5m','15m','30m','1h','4h','1d','1w','1M'];
 
-const cv=$('cv'),ctx=cv.getContext('2d'),AX=70,AY=24;
+const cv=$('cv'),ctx=cv.getContext('2d'),AX=70,AY=26;
 let raw=[],D=[],fvgs=[],tfmin=60,base=60,tfms=36e5,atr=1,bw=8,off=6,W=0,H=0,pw=0,ph=0,lo=0,hi=1,m=null,raf=0,rb=0;
 let tool='cursor',drs=[],sel=null,draft=null,drag=null,down=null,ws=null,poll=null,loadId=0,dw=2,dcol='#2962ff';
 let Dfull=[],rp=null,hist=[],redoS=[],ptrs=new Map(),pinch=null,playT=0,cs=0;
+
+// Vertical panning and scaling variables (like TradingView)
+let vShift=0;
+let vZoom=1;
 
 // Magnet & Angle tools
 let magnetOn=LS('magnetOn',false);
@@ -201,10 +238,38 @@ let angleSnapOn=LS('angleSnapOn',false);
 
 const coarse=matchMedia('(pointer:coarse)').matches,TH=coarse?16:7,HR=coarse?20:9;
 
+/* ---------- Preset Symbols Catalog for Instant Search ---------- */
+const PRESETS=[
+ {sym:'BTC_USDT',bn:'BTCUSDT',fx:'',name:'Bitcoin',cat:'crypto'},
+ {sym:'ETH_USDT',bn:'ETHUSDT',fx:'',name:'Ethereum',cat:'crypto'},
+ {sym:'SOL_USDT',bn:'SOLUSDT',fx:'',name:'Solana',cat:'crypto'},
+ {sym:'BNB_USDT',bn:'BNBUSDT',fx:'',name:'BNB Coin',cat:'crypto'},
+ {sym:'XRP_USDT',bn:'XRPUSDT',fx:'',name:'Ripple',cat:'crypto'},
+ {sym:'DOGE_USDT',bn:'DOGEUSDT',fx:'',name:'Dogecoin',cat:'crypto'},
+ {sym:'ADA_USDT',bn:'ADAUSDT',fx:'',name:'Cardano',cat:'crypto'},
+ {sym:'AVAX_USDT',bn:'AVAXUSDT',fx:'',name:'Avalanche',cat:'crypto'},
+ {sym:'LINK_USDT',bn:'LINKUSDT',fx:'',name:'Chainlink',cat:'crypto'},
+ {sym:'SUI_USDT',bn:'SUIUSDT',fx:'',name:'Sui Network',cat:'crypto'},
+ {sym:'PEPE_USDT',bn:'PEPEUSDT',fx:'',name:'Pepe',cat:'crypto'},
+ {sym:'SHIB_USDT',bn:'SHIBUSDT',fx:'',name:'Shiba Inu',cat:'crypto'},
+ {sym:'NEAR_USDT',bn:'NEARUSDT',fx:'',name:'NEAR Protocol',cat:'crypto'},
+ {sym:'LTC_USDT',bn:'LTCUSDT',fx:'',name:'Litecoin',cat:'crypto'},
+ {sym:'DOT_USDT',bn:'DOTUSDT',fx:'',name:'Polkadot',cat:'crypto'},
+ {sym:'',bn:'',fx:'EUR/USD',name:'Euro / US Dollar',cat:'fx'},
+ {sym:'',bn:'',fx:'GBP/USD',name:'British Pound / US Dollar',cat:'fx'},
+ {sym:'',bn:'',fx:'USD/JPY',name:'US Dollar / Japanese Yen',cat:'fx'},
+ {sym:'',bn:'',fx:'USD/CHF',name:'US Dollar / Swiss Franc',cat:'fx'},
+ {sym:'',bn:'',fx:'AUD/USD',name:'Australian Dollar / USD',cat:'fx'},
+ {sym:'',bn:'',fx:'USD/CAD',name:'US Dollar / Canadian Dollar',cat:'fx'},
+ {sym:'',bn:'',fx:'XAU/USD',name:'Gold / US Dollar',cat:'fx'},
+ {sym:'',bn:'',fx:'XAG/USD',name:'Silver / US Dollar',cat:'fx'}
+];
+
 /* ---------- Helpers & Formatters ---------- */
 const fmt=p=>p>=1000?p.toFixed(2):p>=100?p.toFixed(3):p>=1?p.toFixed(5):p.toFixed(6);
 const rgba=(h,a)=>{const n=parseInt(h.slice(1),16);return`rgba(${n>>16},${n>>8&255},${n&255},${a})`};
 const nice=(r,t)=>{const s=r/t,p=10**Math.floor(Math.log10(s)),f=s/p;return(f<1.5?1:f<3?2:f<7?5:10)*p};
+
 const idxAt=x=>(x-pw)/bw+D.length-1+off, xAt=i=>pw-(D.length-1+off-i)*bw;
 const yAt=p=>(hi-p)/(hi-lo)*ph, pAt=y=>hi-y/ph*(hi-lo);
 
@@ -225,7 +290,7 @@ function tOf(i){
 }
 const X=t=>xAt(idxOf(t)),Y=p=>yAt(p);
 
-// Magnet snapping logic (TradingView magnet feature)
+// Magnet Snap detection (finds nearest OHLC of nearest candle)
 function getSnapped(x,y){
  if(!magnetOn||!D.length)return{x,y,p:pAt(y),t:tOf(idxAt(x)),snapped:false};
  const curI=Math.round(idxAt(x));
@@ -237,7 +302,13 @@ function getSnapped(x,y){
   const d=Math.abs(levels[k]-curP);
   if(d<minD){minD=d;bestP=levels[k]}
  }
- return{x:xAt(i),y:yAt(bestP),p:bestP,t:b.t,snapped:true};
+ const snapPxY=yAt(bestP);
+ const snapPxX=xAt(i);
+ // Only snap if within reasonable distance (35px)
+ if(Math.hypot(x-snapPxX,y-snapPxY)<35){
+  return{x:snapPxX,y:snapPxY,p:bestP,t:b.t,snapped:true};
+ }
+ return{x,y,p:curP,t:tOf(idxAt(x)),snapped:false};
 }
 
 const pt=(x,y)=>{
@@ -290,7 +361,7 @@ function symBadge(sym,src){
  return`<div class="sym-icon" style="background:${bg}">${txt}</div>`;
 }
 
-/* ---------- Data Fetching Engine ---------- */
+/* ---------- Data Engine ---------- */
 function plan(){
  const p=tfParse(S.tf)||{min:60,label:'1h'};
  S.tf=p.label;tfmin=p.min;tfms=tfmin*6e4;
@@ -344,7 +415,7 @@ async function fetchBn(sym,iv,pages,endT){
    if(out.length)return out;
   }catch(e){lastErr=e}
  }
- throw lastErr||Error('Binance unreachable. Your network may block binance domains; try Gate.io or VPN/DoH.');
+ throw lastErr||Error('Binance unreachable. Enable VPN/Secure DNS or select Gate.io');
 }
 
 async function fetchTd(sym,iv,size,endT){
@@ -427,6 +498,7 @@ async function load(){
   }
   if(my!==loadId)return;
   if(!raw.length)throw Error('No data for '+S.sym);
+  vShift=0;vZoom=1; // Reset view on new symbol load
   rebuild();off=6;bw=8;status('');sched();live(my,iv);
  }catch(e){
   if(my===loadId){
@@ -503,7 +575,7 @@ function render(d,isSel){
   ctx.beginPath();P.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));ctx.stroke();
  }
  
- // Selection handles (circles for editing vertices)
+ // Selection handles (circles for modifying vertices)
  if(isSel){
   for(const h of handles(d)){
    ctx.beginPath();ctx.arc(h.x,h.y,HR*.6,0,7);ctx.fillStyle='#fff';ctx.fill();
@@ -515,6 +587,7 @@ function render(d,isSel){
 function handles(d){
  const P=d.pts.map(q=>[X(q.t),Y(q.p)]),H=P.map((p,i)=>({x:p[0],y:p[1],k:i}));
  if(d.type==='hline')H[0].x=pw/2;
+ if(d.type==='hray')H[0].x=P[0][0];
  if(d.type==='vline')H[0].y=ph/2;
  if(d.s!=null){
   const mx=(P[0][0]+P[1][0])/2;
@@ -543,7 +616,12 @@ const saveDr=()=>SV('dr:'+S.src+S.sym,drs);
 const snap=()=>{hist.push(JSON.stringify(drs));if(hist.length>100)hist.shift();redoS=[]};
 function undo(){if(!hist.length)return;redoS.push(JSON.stringify(drs));drs=JSON.parse(hist.pop());sel=null;draft=null;saveDr();sched()}
 function redo(){if(!redoS.length)return;hist.push(JSON.stringify(drs));drs=JSON.parse(redoS.pop());sel=null;draft=null;saveDr();sched()}
-function commit(d){snap();d.id=Date.now()+Math.random();drs.push(d);sel=d;draft=null;setTool('cursor');saveDr();sched()}
+
+// When a drawing is committed, keep the tool selected so user can draw multiple objects!
+function commit(d){
+ snap();d.id=Date.now()+Math.random();drs.push(d);sel=d;draft=null;saveDr();sched();
+}
+
 function finishPoly(){
  if(!draft||draft.type!=='poly')return;
  const p=draft.pts;p.pop();
@@ -565,13 +643,24 @@ function togglePlay(){if(rp)setPlay(rp.play?0:1)}
 
 /* ---------- Main Chart Rendering ---------- */
 function draw(){
- raf=0;if(!W||!H)return;ctx.fillStyle=cfg.bg;ctx.fillRect(0,0,W,H);
- if(!D.length){ctx.fillStyle='#888';ctx.font='14px system-ui';ctx.textAlign='center';ctx.fillText('No data available',W/2,H/2);ctx.textAlign='left';return}
+ raf=0;if(!W||!H)return;
+ ctx.fillStyle=cfg.bg;ctx.fillRect(0,0,W,H);
+ if(!D.length){
+  ctx.fillStyle='#888';ctx.font='14px system-ui';ctx.textAlign='center';
+  ctx.fillText('No data available',W/2,H/2);ctx.textAlign='left';return;
+ }
  const n=D.length,i0=Math.max(0,Math.floor(idxAt(0))),i1=Math.min(n-1,Math.ceil(idxAt(pw)));
  let l=Infinity,h=-Infinity;
  for(let i=i0;i<=i1;i++){const b=D[i];if(b.l<l)l=b.l;if(b.h>h)h=b.h}
  if(!isFinite(l)||l===h){l=D[n-1].c*.99;h=D[n-1].c*1.01}
- const pad=(h-l)*.06;lo=l-pad;hi=h+pad;
+ 
+ // Generous TradingView-style vertical margin padding (16%)
+ const span=(h-l);
+ const pad=span*0.16;
+ const mid=(h+l)/2;
+ const halfSpan=(span/2+pad)*vZoom;
+ lo=mid-halfSpan+vShift;
+ hi=mid+halfSpan+vShift;
 
  // Grid lines
  ctx.strokeStyle=cfg.grid;ctx.lineWidth=1;ctx.beginPath();
@@ -586,7 +675,7 @@ function draw(){
  }
  ctx.stroke();
 
- // Fair Value Gaps (FVG) - Restored and verified
+ // Fair Value Gaps (FVG)
  if(cfg.fvgOn){
   const list=[...fvgs.filter(f=>f.e<0).slice(-cfg.fvgMax)];
   if(cfg.fvgMit)list.push(...fvgs.filter(f=>f.e>=0).slice(-cfg.fvgMax));
@@ -631,29 +720,35 @@ function draw(){
   const b=D[i];
   if(Math.floor(b.t/6e4/tStep)!==Math.floor((i?D[i-1].t:0)/6e4/tStep)){
    const d=new Date(b.t),s=tfmin>=1440?d.toLocaleDateString(undefined,{month:'short',day:'numeric'}):d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
-   ctx.fillText(s,xAt(i),ph+16);
+   ctx.fillText(s,xAt(i),ph+17);
   }
  }
 
- // Crosshair & Magnet Indicator
- if(m&&m.x<pw&&m.y<ph){
-  let cx=m.x,cy=m.y;
+ // Precision Crosshair (Centered directly under mouse cursor)
+ if(m&&m.x>=0&&m.x<pw&&m.y>=0&&m.y<ph){
+  ctx.strokeStyle='#4a5568';ctx.lineWidth=1;ctx.setLineDash([3,3]);ctx.beginPath();
+  ctx.moveTo(0,Math.round(m.y)+.5);ctx.lineTo(pw,Math.round(m.y)+.5);
+  ctx.moveTo(Math.round(m.x)+.5,0);ctx.lineTo(Math.round(m.x)+.5,ph);
+  ctx.stroke();ctx.setLineDash([]);
+  
+  // Price tag
+  const p=pAt(m.y);ctx.fillStyle='#2962ff';ctx.fillRect(pw,m.y-10,AX,20);ctx.fillStyle='#fff';ctx.textAlign='left';ctx.fillText(fmt(p),pw+5,m.y+4);
+  
+  // Time tag & OHLC
+  const curI=Math.round(idxAt(m.x));
+  if(curI>=0&&curI<n){
+   const b=D[curI],d=new Date(b.t),s=d.toLocaleString([],{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+   ctx.fillRect(m.x-45,ph,90,18);ctx.fillStyle='#fff';ctx.textAlign='center';ctx.fillText(s,m.x,ph+13);
+   $('ohlc').innerHTML=`<span style="color:#fff;font-weight:600">${S.sym} · ${S.tf}</span> O:${fmt(b.o)} H:${fmt(b.h)} L:${fmt(b.l)} C:${fmt(b.c)} <span style="color:${b.c>=b.o?'#26a69a':'#ef5350'}">${((b.c-b.o)/b.o*100).toFixed(2)}%</span>`;
+  }
+
+  // Magnet snap target indicator (shows anchor without shifting the crosshair)
   if(magnetOn){
    const sn=getSnapped(m.x,m.y);
    if(sn.snapped){
-    cx=sn.x;cy=sn.y;
-    // Draw snap magnet target
-    ctx.beginPath();ctx.arc(cx,cy,5,0,7);ctx.strokeStyle='#00e676';ctx.lineWidth=2;ctx.stroke();
+    ctx.beginPath();ctx.arc(sn.x,sn.y,4,0,7);ctx.fillStyle='#00e676';ctx.fill();
+    ctx.strokeStyle='#fff';ctx.lineWidth=1.5;ctx.stroke();
    }
-  }
-  ctx.strokeStyle='#4a5568';ctx.setLineDash([4,4]);ctx.beginPath();
-  ctx.moveTo(0,cy+.5);ctx.lineTo(pw,cy+.5);ctx.moveTo(cx+.5,0);ctx.lineTo(cx+.5,ph);ctx.stroke();ctx.setLineDash([]);
-  const p=pAt(cy);ctx.fillStyle='#2962ff';ctx.fillRect(pw,cy-10,AX,20);ctx.fillStyle='#fff';ctx.textAlign='left';ctx.fillText(fmt(p),pw+5,cy+4);
-  const curI=Math.round(idxAt(cx));
-  if(curI>=0&&curI<n){
-   const b=D[curI],d=new Date(b.t),s=d.toLocaleString([],{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
-   ctx.fillRect(cx-45,ph,90,18);ctx.fillStyle='#fff';ctx.textAlign='center';ctx.fillText(s,cx,ph+13);
-   $('ohlc').innerHTML=`<span style="color:#fff;font-weight:600">${S.sym} · ${S.tf}</span> O:${fmt(b.o)} H:${fmt(b.h)} L:${fmt(b.l)} C:${fmt(b.c)} <span style="color:${b.c>=b.o?'#26a69a':'#ef5350'}">${((b.c-b.o)/b.o*100).toFixed(2)}%</span>`;
   }
  }
 
@@ -665,7 +760,10 @@ function draw(){
 }
 
 /* ---------- Pointer Interaction & Drawing Manipulation ---------- */
-const pos=e=>{const r=cv.getBoundingClientRect();return[e.clientX-r.left,e.clientY-r.top]};
+const pos=e=>{
+ const r=cv.getBoundingClientRect();
+ return[e.clientX-r.left,e.clientY-r.top];
+};
 
 cv.onpointerdown=e=>{
  cv.setPointerCapture(e.pointerId);
@@ -675,8 +773,15 @@ cv.onpointerdown=e=>{
   pinch={d:Math.hypot(a[0]-b[0],a[1]-b[1])||1,bw:bw,idx:idxAt((a[0]+b[0])/2)};
   drag=null;draft=null;return;
  }
- if(!D.length||x>pw||y>ph)return;
+ if(!D.length)return;
  down={x,y};
+
+ // Dragging on price axis scales price vertically (TradingView feature)
+ if(x>=pw&&y<ph){
+  drag={type:'vscale',y0:y,shift0:vShift,zoom0:vZoom};
+  return;
+ }
+ if(x>pw||y>ph)return;
 
  if(rp&&rp.pick){
   const i=Math.max(0,Math.min(D.length-1,Math.round(idxAt(x))));
@@ -701,21 +806,23 @@ cv.onpointerdown=e=>{
   sched();return;
  }
 
- // Check for clicking handles of selected drawing (Modify existing drawings)
+ // Check for clicking handles of selected drawing to edit
  const hd=sel&&handles(sel).find(h=>Math.hypot(h.x-x,h.y-y)<HR);
  if(hd){
   drag={type:'h',k:hd.k};
   return;
  }
 
- // Check for clicking body of existing drawing to select and move it
+ // Check for clicking existing drawing
  const h=hit(x,y);
  if(h){
   sel=h;
   drag={type:'move',i0:idxAt(x),p0:pAt(y),orig:JSON.parse(JSON.stringify(h))};
-  $('w').value=h.w;$('col').value=h.color;
+  $('w').value=h.w+'px';$('col').value=h.color;
  }else{
-  sel=null;drag={type:'pan',off};
+  sel=null;
+  // Dragging chart allows BOTH horizontal and vertical panning!
+  drag={type:'pan',off,vShift};
  }
  sched();
 };
@@ -732,18 +839,17 @@ cv.onpointermove=e=>{
 
  if(draft){
   let targetX=x,targetY=y;
-  // Angle snapping for trendlines (TradingView horizontal locking)
   if((angleSnapOn||e.shiftKey)&&draft.type==='trend'&&draft.sx!=null){
    const dx=x-draft.sx,dy=y-draft.sy;
    const deg=Math.atan2(dy,dx)*180/Math.PI;
-   if(Math.abs(deg)<22.5||Math.abs(deg)>157.5){targetY=draft.sy} // Snap pure horizontal
-   else if(Math.abs(Math.abs(deg)-45)<15){targetY=draft.sy+Math.sign(dy)*Math.abs(dx)} // Snap 45 degrees
-   else if(Math.abs(Math.abs(deg)-90)<15){targetX=draft.sx} // Snap pure vertical
+   if(Math.abs(deg)<22.5||Math.abs(deg)>157.5){targetY=draft.sy}
+   else if(Math.abs(Math.abs(deg)-45)<15){targetY=draft.sy+Math.sign(dy)*Math.abs(dx)}
+   else if(Math.abs(Math.abs(deg)-90)<15){targetX=draft.sx}
   }
   draft.pts[draft.pts.length-1]=pt(targetX,targetY);
  }
 
- // Dragging a handle to modify drawing vertices
+ // Dragging a handle to modify drawing
  if(drag&&sel&&drag.type==='h'){
   if(!drag.s){snap();drag.s=1}
   const sn=magnetOn?getSnapped(x,y):{p:pAt(y),t:tOf(idxAt(x))};
@@ -761,8 +867,16 @@ cv.onpointermove=e=>{
   sel.pts=drag.orig.pts.map(q=>({t:tOf(idxOf(q.t)+di),p:q.p+dp}));
   if(sel.s!=null){sel.s=drag.orig.s+dp;sel.tg=drag.orig.tg+dp}
  }
+ // Vertical scale zoom on price axis
+ else if(drag&&drag.type==='vscale'){
+  const dy=y-drag.y0;
+  vZoom=Math.max(0.2,Math.min(5,drag.zoom0*Math.exp(dy*0.006)));
+ }
+ // Two-way chart panning (both horizontal and vertical!)
  else if(drag&&drag.type==='pan'){
   off=Math.max(-(D.length-5),Math.min(300,drag.off-(x-down.x)/bw));
+  const pPerPx=(hi-lo)/ph;
+  vShift=drag.vShift+(y-down.y)*pPerPx;
  }
  sched();
 };
@@ -776,12 +890,18 @@ cv.onpointerup=e=>{
    draft.pts[1]=pt(x,y);commit(draft);
   }
  }
- if(drag&&drag.type!=='pan')saveDr();
+ if(drag&&drag.type!=='pan'&&drag.type!=='vscale')saveDr();
  drag=null;
 };
 
+// Double-click resets vertical shift and scale (auto-fit price)
+cv.ondblclick=e=>{
+ const[x]=pos(e);
+ if(x>=pw){vShift=0;vZoom=1;sched();return}
+ finishPoly();
+};
+
 cv.onmouseleave=()=>{m=null;$('ohlc').innerHTML='';sched()};
-cv.ondblclick=()=>finishPoly();
 
 cv.addEventListener('wheel',e=>{
  e.preventDefault();if(!D.length)return;
@@ -801,7 +921,10 @@ addEventListener('keydown',e=>{
   if(e.key==='ArrowLeft'){setPlay(0);step(-1);return}
   if(e.key===' '){e.preventDefault();togglePlay();return}
  }
- if(e.key==='Escape'){draft=null;setTool('cursor');sel=null;sched()}
+ if(e.key==='Escape'){
+  draft=null;setTool('cursor');sel=null;sched();
+  $('sym-search-dropdown').hidden=true;
+ }
  else if(e.key==='Enter')finishPoly();
  else if((e.key==='Delete'||e.key==='Backspace')&&sel){
   snap();drs=drs.filter(d=>d!==sel);sel=null;saveDr();sched();
@@ -852,13 +975,21 @@ function renderToolsUI(){
  };
  $('angle').onclick=()=>{
   angleSnapOn=!angleSnapOn;SV('angleSnapOn',angleSnapOn);$('angle').classList.toggle('on',angleSnapOn);
-  status(angleSnapOn?'Angle Snap ON (Locks horizontal)':'Angle Snap OFF');setTimeout(()=>status(''),2000);
+  status(angleSnapOn?'Angle Snap ON':'Angle Snap OFF');setTimeout(()=>status(''),2000);
  };
  $('w').onchange=e=>{dw=+e.target.value.replace('px','');if(sel){snap();sel.w=dw;saveDr();sched()}};
  $('col').oninput=e=>{dcol=e.target.value;if(sel){if(!cs){snap();cs=1}sel.color=dcol;saveDr();sched()}};
  $('col').onchange=()=>{cs=0};
+ $('und').onclick=undo;
+ $('red').onclick=redo;
  $('del').onclick=()=>{if(sel){snap();drs=drs.filter(d=>d!==sel);sel=null;saveDr();sched()}};
- $('clr').onclick=()=>{if(confirm('Clear all drawings on this chart?')){snap();drs=[];sel=null;saveDr();sched()}};
+ 
+ // Clear drawings WITHOUT disabling future drawings!
+ $('clr').onclick=()=>{
+  snap();drs=[];sel=null;draft=null;drag=null;saveDr();
+  status('All drawings cleared');setTimeout(()=>status(''),2000);
+  sched();
+ };
 }
 
 function tfUI(){
@@ -867,7 +998,92 @@ function tfUI(){
 }
 $('tfs').onclick=e=>{const b=e.target.closest('[data-tf]');if(b){S.tf=b.dataset.tf;SV('S',S);tfUI();load()}};
 $('ctf').onkeydown=e=>{if(e.key==='Enter'){const p=tfParse($('ctf').value);if(!p){status('Use a number + m, h, d, w or M (e.g. 7m, 3h, 2d)',1);return}S.tf=p.label;SV('S',S);tfUI();load()}};
-$('sym').onkeydown=e=>{if(e.key==='Enter')setSym($('src').value,$('sym').value)};
+
+/* ---------- Symbol Autocomplete & Search Dropdown ---------- */
+let curCat='all';
+
+function renderSearchResults(query=''){
+ const q=query.trim().toLowerCase();
+ const filtered=PRESETS.filter(p=>{
+  if(curCat==='crypto'&&p.cat!=='crypto')return false;
+  if(curCat==='fx'&&p.cat!=='fx')return false;
+  if(!q)return true;
+  const symStr=(p.sym||p.bn||p.fx).toLowerCase();
+  return symStr.includes(q)||p.name.toLowerCase().includes(q);
+ });
+ 
+ if(!filtered.length){
+  $('search-results').innerHTML=`<div style="padding:16px;text-align:center;color:#6b7280">No presets found. Press Enter to load "<b>${query.toUpperCase()}</b>" directly.</div>`;
+  return;
+ }
+ 
+ $('search-results').innerHTML=filtered.map(p=>{
+  const isFx=p.cat==='fx';
+  const displaySym=isFx?p.fx:p.sym;
+  const src=isFx?'fx':(S.src==='bn'?'bn':'gate');
+  return `
+  <div class="s-item" data-sym="${displaySym}" data-src="${isFx?'fx':src}">
+   ${symBadge(displaySym,src)}
+   <div style="display:flex;flex-direction:column">
+    <span class="s-sym">${displaySym}</span>
+    <span class="s-desc">${p.name}</span>
+   </div>
+   <span class="s-tag">${isFx?'Forex':(src==='bn'?'Binance':'Gate.io')}</span>
+  </div>
+  `;
+ }).join('');
+}
+
+$('sym').onclick=()=>{
+ $('sym-search-dropdown').hidden=false;
+ $('search-input').value='';
+ renderSearchResults('');
+ setTimeout(()=>$('search-input').focus(),50);
+};
+
+$('search-input').oninput=e=>renderSearchResults(e.target.value);
+$('search-input').onkeydown=e=>{
+ if(e.key==='Enter'){
+  const val=$('search-input').value.trim();
+  if(val){
+   const first=$('search-results').querySelector('.s-item');
+   if(first){
+    first.click();
+   }else{
+    setSym(S.src,val);
+    $('sym-search-dropdown').hidden=true;
+   }
+  }
+ }
+};
+
+$('search-tabs').onclick=e=>{
+ const b=e.target.closest('.stab');
+ if(b){
+  document.querySelectorAll('.stab').forEach(s=>s.classList.remove('on'));
+  b.classList.add('on');
+  curCat=b.dataset.cat;
+  renderSearchResults($('search-input').value);
+ }
+};
+
+$('search-results').onclick=e=>{
+ const item=e.target.closest('.s-item');
+ if(item){
+  const sym=item.dataset.sym;
+  const src=item.dataset.src;
+  $('sym-search-dropdown').hidden=true;
+  setSym(src,sym);
+ }
+};
+
+// Close search when clicking outside
+document.addEventListener('click',e=>{
+ if(!e.target.closest('#sym-box')){
+  $('sym-search-dropdown').hidden=true;
+ }
+});
+
 $('src').onchange=()=>{
  const v=$('src').value;
  setSym(v,v==='gate'?'BTC_USDT':v==='bn'?'BTCUSDT':'EUR/USD');
@@ -1020,8 +1236,6 @@ $('rb').onclick=()=>{setPlay(0);step(-1)};
 $('rf').onclick=()=>{setPlay(0);step(1)};
 $('rpl').onclick=togglePlay;
 $('rx').onclick=exitRp;
-$('und').onclick=undo;
-$('red').onclick=redo;
 
 cv.onpointercancel=e=>{ptrs.delete(e.pointerId);pinch=null;drag=null};
 if('serviceWorker' in navigator&&/^https?:/.test(location.protocol))navigator.serviceWorker.register('sw.js').catch(()=>{});
@@ -1029,7 +1243,9 @@ if('serviceWorker' in navigator&&/^https?:/.test(location.protocol))navigator.se
 /* ---------- Bootstrap ---------- */
 function resize(){
  const r=$('cw').getBoundingClientRect(),d=devicePixelRatio||1;
- W=r.width;H=r.height;cv.width=W*d;cv.height=H*d;
+ W=Math.round(r.width);H=Math.round(r.height);
+ cv.width=Math.round(W*d);cv.height=Math.round(H*d);
+ cv.style.width=W+'px';cv.style.height=H+'px';
  ctx.setTransform(d,0,0,d,0,0);
  pw=W-AX;ph=H-AY;sched();
 }
