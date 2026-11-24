@@ -160,10 +160,10 @@ button.on{background:#2962ff;border-color:#2962ff;color:#fff}
  </div>
  
  <select id="src">
+  <option value="tv">TradingView</option>
   <option value="gate">Gate.io</option>
   <option value="bn">Binance</option>
   <option value="fx">Twelve Data</option>
-  <option value="fh">Finnhub</option>
  </select>
  
  <button id="sym-btn" title="Search symbol (TradingView style)">
@@ -188,6 +188,7 @@ button.on{background:#2962ff;border-color:#2962ff;color:#fff}
 
 <!-- Chart Canvas -->
 <div id="cw">
+ <div id="tv-box" style="position:absolute;inset:0;width:100%;height:100%;z-index:3;background:#0e1117" hidden></div>
  <canvas id="cv"></canvas>
  <div id="ohlc"></div>
  <div id="dr-menu" hidden>
@@ -234,10 +235,10 @@ button.on{background:#2962ff;border-color:#2962ff;color:#fff}
   </div>
   <div id="search-brokers">
    <button class="sbrk on" data-brk="all">All Brokers</button>
+   <button class="sbrk" data-brk="tv">TradingView</button>
    <button class="sbrk" data-brk="gate">Gate.io</button>
    <button class="sbrk" data-brk="bn">Binance</button>
    <button class="sbrk" data-brk="fx">Twelve Data</button>
-   <button class="sbrk" data-brk="fh">Finnhub</button>
   </div>
   <div id="search-results"></div>
  </div>
@@ -297,7 +298,7 @@ const SV=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch{}};
 
 const cfg=Object.assign({
  up:'#26a69a',dn:'#ef5350',wickUp:'#26a69a',wickDn:'#ef5350',bg:'#0e1117',grid:'#1a202b',
- fvgOn:true,fvgUp:'#2ecc71',fvgDn:'#e74c3c',fvgOp:0.25,fvgMin:0.02,fvgMax:30,fvgMit:false,gapFree:true,key:'',fhKey:''
+ fvgOn:true,fvgUp:'#2ecc71',fvgDn:'#e74c3c',fvgOp:0.25,fvgMin:0.02,fvgMax:30,fvgMit:false,gapFree:true,key:''
 },LS('cfg',{}));
 
 const S=Object.assign({src:'gate',sym:'BTC_USDT',tf:'1h'},LS('S',{}));
@@ -311,7 +312,7 @@ const wls=LS('wls',{
   {src:'gate',sym:'XRP_USDT'},
   {src:'fx',sym:'EUR/USD'},
   {src:'fx',sym:'XAU/USD'},
-  {src:'fh',sym:'OANDA:SPX500_USD'}
+  {src:'tv',sym:'FOREXCOM:SPX500'}
  ]
 });
 let wcur=LS('wcur','Main');if(!wls[wcur])wcur=Object.keys(wls)[0];
@@ -319,7 +320,6 @@ let wcur=LS('wcur','Main');if(!wls[wcur])wcur=Object.keys(wls)[0];
 const NG={1:'1m',5:'5m',15:'15m',30:'30m',60:'1h',240:'4h',480:'8h',1440:'1d',10080:'7d',43200:'30d'};
 const NB={1:'1m',3:'3m',5:'5m',15:'15m',30:'30m',60:'1h',120:'2h',240:'4h',360:'6h',480:'8h',720:'12h',1440:'1d',4320:'3d',10080:'1w',43200:'1M'};
 const NF={1:'1min',5:'5min',15:'15min',30:'30min',45:'45min',60:'1h',120:'2h',240:'4h',1440:'1day',10080:'1week',43200:'1month'};
-const NFh={1:'1',5:'5',15:'15',30:'30',60:'60',1440:'D',10080:'W',43200:'M'};
 const FAV=['1m','5m','15m','30m','1h','4h','1d','1w','1M'];
 
 const cv=$('cv'),ctx=cv.getContext('2d'),AX=76,AY=26;
@@ -342,35 +342,35 @@ const coarse=matchMedia('(pointer:coarse)').matches,TH=coarse?16:7,HR=coarse?20:
 
 /* ---------- Preset Symbols Catalog for Instant Search ---------- */
 const PRESETS=[
- {sym:'BTC_USDT',bn:'BTCUSDT',fx:'',fh:'BINANCE:BTCUSDT',name:'Bitcoin',cat:'crypto',src:'gate'},
- {sym:'ETH_USDT',bn:'ETHUSDT',fx:'',fh:'BINANCE:ETHUSDT',name:'Ethereum',cat:'crypto',src:'gate'},
- {sym:'SOL_USDT',bn:'SOLUSDT',fx:'',fh:'BINANCE:SOLUSDT',name:'Solana',cat:'crypto',src:'gate'},
- {sym:'BNB_USDT',bn:'BNBUSDT',fx:'',fh:'BINANCE:BNBUSDT',name:'BNB Coin',cat:'crypto',src:'gate'},
- {sym:'XRP_USDT',bn:'XRPUSDT',fx:'',fh:'BINANCE:XRPUSDT',name:'Ripple',cat:'crypto',src:'gate'},
- {sym:'DOGE_USDT',bn:'DOGEUSDT',fx:'',fh:'',name:'Dogecoin',cat:'crypto',src:'gate'},
- {sym:'ADA_USDT',bn:'ADAUSDT',fx:'',fh:'',name:'Cardano',cat:'crypto',src:'gate'},
- {sym:'AVAX_USDT',bn:'AVAXUSDT',fx:'',fh:'',name:'Avalanche',cat:'crypto',src:'gate'},
- {sym:'LINK_USDT',bn:'LINKUSDT',fx:'',fh:'',name:'Chainlink',cat:'crypto',src:'gate'},
- {sym:'SUI_USDT',bn:'SUIUSDT',fx:'',fh:'',name:'Sui Network',cat:'crypto',src:'gate'},
- {sym:'PEPE_USDT',bn:'PEPEUSDT',fx:'',fh:'',name:'Pepe',cat:'crypto',src:'gate'},
- {sym:'SHIB_USDT',bn:'SHIBUSDT',fx:'',fh:'',name:'Shiba Inu',cat:'crypto',src:'gate'},
- {sym:'NEAR_USDT',bn:'NEARUSDT',fx:'',fh:'',name:'NEAR Protocol',cat:'crypto',src:'gate'},
- {sym:'LTC_USDT',bn:'LTCUSDT',fx:'',fh:'',name:'Litecoin',cat:'crypto',src:'gate'},
- {sym:'DOT_USDT',bn:'DOTUSDT',fx:'',fh:'',name:'Polkadot',cat:'crypto',src:'gate'},
- {sym:'',bn:'',fx:'EUR/USD',fh:'OANDA:EUR_USD',name:'Euro / US Dollar',cat:'fx',src:'fx'},
- {sym:'',bn:'',fx:'GBP/USD',fh:'OANDA:GBP_USD',name:'British Pound / US Dollar',cat:'fx',src:'fx'},
- {sym:'',bn:'',fx:'USD/JPY',fh:'OANDA:USD_JPY',name:'US Dollar / Japanese Yen',cat:'fx',src:'fx'},
- {sym:'',bn:'',fx:'USD/CHF',fh:'OANDA:USD_CHF',name:'US Dollar / Swiss Franc',cat:'fx',src:'fx'},
- {sym:'',bn:'',fx:'AUD/USD',fh:'OANDA:AUD_USD',name:'Australian Dollar / USD',cat:'fx',src:'fx'},
- {sym:'',bn:'',fx:'USD/CAD',fh:'OANDA:USD_CAD',name:'US Dollar / Canadian Dollar',cat:'fx',src:'fx'},
- {sym:'',bn:'',fx:'XAU/USD',fh:'OANDA:XAU_USD',name:'Gold Spot / U.S. Dollar',cat:'fx',src:'fh'},
- {sym:'',bn:'',fx:'XAG/USD',fh:'OANDA:XAG_USD',name:'Silver Spot / U.S. Dollar',cat:'fx',src:'fh'},
- {sym:'',bn:'',fx:'N225',fh:'OANDA:JP225_USD',name:'Nikkei 225 / JP225',cat:'fx',src:'fh'},
- {sym:'',bn:'',fx:'SPX',fh:'OANDA:SPX500_USD',name:'S&P 500 Index / US500',cat:'fx',src:'fh'},
- {sym:'',bn:'',fx:'NDX',fh:'OANDA:NAS100_USD',name:'Nasdaq 100 / NAS100',cat:'fx',src:'fh'},
- {sym:'',bn:'',fx:'DJI',fh:'OANDA:US30_USD',name:'Dow Jones Industrial / US30',cat:'fx',src:'fh'},
- {sym:'',bn:'',fx:'DAX',fh:'OANDA:GER30_EUR',name:'DAX 40 (Germany)',cat:'fx',src:'fh'},
- {sym:'',bn:'',fx:'IXIC',fh:'',name:'Nasdaq Composite',cat:'fx',src:'fx'}
+ {sym:'BTC_USDT',bn:'BTCUSDT',fx:'',tv:'BINANCE:BTCUSDT',name:'Bitcoin',cat:'crypto',src:'gate'},
+ {sym:'ETH_USDT',bn:'ETHUSDT',fx:'',tv:'BINANCE:ETHUSDT',name:'Ethereum',cat:'crypto',src:'gate'},
+ {sym:'SOL_USDT',bn:'SOLUSDT',fx:'',tv:'BINANCE:SOLUSDT',name:'Solana',cat:'crypto',src:'gate'},
+ {sym:'BNB_USDT',bn:'BNBUSDT',fx:'',tv:'BINANCE:BNBUSDT',name:'BNB Coin',cat:'crypto',src:'gate'},
+ {sym:'XRP_USDT',bn:'XRPUSDT',fx:'',tv:'BINANCE:XRPUSDT',name:'Ripple',cat:'crypto',src:'gate'},
+ {sym:'DOGE_USDT',bn:'DOGEUSDT',fx:'',tv:'BINANCE:DOGEUSDT',name:'Dogecoin',cat:'crypto',src:'gate'},
+ {sym:'ADA_USDT',bn:'ADAUSDT',fx:'',tv:'BINANCE:ADAUSDT',name:'Cardano',cat:'crypto',src:'gate'},
+ {sym:'AVAX_USDT',bn:'AVAXUSDT',fx:'',tv:'BINANCE:AVAXUSDT',name:'Avalanche',cat:'crypto',src:'gate'},
+ {sym:'LINK_USDT',bn:'LINKUSDT',fx:'',tv:'BINANCE:LINKUSDT',name:'Chainlink',cat:'crypto',src:'gate'},
+ {sym:'SUI_USDT',bn:'SUIUSDT',fx:'',tv:'BINANCE:SUIUSDT',name:'Sui Network',cat:'crypto',src:'gate'},
+ {sym:'PEPE_USDT',bn:'PEPEUSDT',fx:'',tv:'BINANCE:PEPEUSDT',name:'Pepe',cat:'crypto',src:'gate'},
+ {sym:'SHIB_USDT',bn:'SHIBUSDT',fx:'',tv:'BINANCE:SHIBUSDT',name:'Shiba Inu',cat:'crypto',src:'gate'},
+ {sym:'NEAR_USDT',bn:'NEARUSDT',fx:'',tv:'BINANCE:NEARUSDT',name:'NEAR Protocol',cat:'crypto',src:'gate'},
+ {sym:'LTC_USDT',bn:'LTCUSDT',fx:'',tv:'BINANCE:LTCUSDT',name:'Litecoin',cat:'crypto',src:'gate'},
+ {sym:'DOT_USDT',bn:'DOTUSDT',fx:'',tv:'BINANCE:DOTUSDT',name:'Polkadot',cat:'crypto',src:'gate'},
+ {sym:'',bn:'',fx:'EUR/USD',tv:'OANDA:EURUSD',name:'Euro / US Dollar',cat:'fx',src:'tv'},
+ {sym:'',bn:'',fx:'GBP/USD',tv:'OANDA:GBPUSD',name:'British Pound / US Dollar',cat:'fx',src:'tv'},
+ {sym:'',bn:'',fx:'USD/JPY',tv:'OANDA:USDJPY',name:'US Dollar / Japanese Yen',cat:'fx',src:'tv'},
+ {sym:'',bn:'',fx:'USD/CHF',tv:'OANDA:USDCHF',name:'US Dollar / Swiss Franc',cat:'fx',src:'tv'},
+ {sym:'',bn:'',fx:'AUD/USD',tv:'OANDA:AUDUSD',name:'Australian Dollar / USD',cat:'fx',src:'tv'},
+ {sym:'',bn:'',fx:'USD/CAD',tv:'OANDA:USDCAD',name:'US Dollar / Canadian Dollar',cat:'fx',src:'tv'},
+ {sym:'',bn:'',fx:'XAU/USD',tv:'OANDA:XAUUSD',name:'Gold Spot / U.S. Dollar',cat:'fx',src:'tv'},
+ {sym:'',bn:'',fx:'XAG/USD',tv:'OANDA:XAGUSD',name:'Silver Spot / U.S. Dollar',cat:'fx',src:'tv'},
+ {sym:'',bn:'',fx:'N225',tv:'OANDA:JP225USD',name:'Nikkei 225 (JP225 / OANDA)',cat:'fx',src:'tv'},
+ {sym:'',bn:'',fx:'SPX',tv:'FOREXCOM:SPX500',name:'S&P 500 Index (SPX500 / Forex.com)',cat:'fx',src:'tv'},
+ {sym:'',bn:'',fx:'NDX',tv:'FOREXCOM:NAS100',name:'Nasdaq 100 (NAS100 / Forex.com)',cat:'fx',src:'tv'},
+ {sym:'',bn:'',fx:'DJI',tv:'FOREXCOM:DJI',name:'Dow Jones Industrial (US30 / Forex.com)',cat:'fx',src:'tv'},
+ {sym:'',bn:'',fx:'DAX',tv:'FOREXCOM:GER40',name:'DAX 40 (Germany / GER40)',cat:'fx',src:'tv'},
+ {sym:'',bn:'',fx:'IXIC',tv:'NASDAQ:IXIC',name:'Nasdaq Composite',cat:'fx',src:'tv'}
 ];
 
 // Dynamic Twelve Data Symbol Catalog (Cached from API)
@@ -460,15 +460,15 @@ function tfParse(s){
 const normSym=(src,s)=>{
  s=s.toUpperCase().replace(/[^A-Z0-9/._:-]/g,'');
  if(src==='fx'&&!s.includes('/')&&s.length===6)s=s.slice(0,3)+'/'+s.slice(3);
- if(src==='fh'){
-  if(s.includes('/')||(!s.includes(':')&&['EUR','GBP','JPY','AUD','CAD','CHF','NZD','XAU','XAG'].some(c=>s.includes(c))&&s.length<=7)){
-   s='OANDA:'+s.replace('/', '_');
-  } else if(!s.includes(':')&&['SPX','NAS','JP225','US30','GER30','UK100','N225','NDX','DJI'].some(c=>s.includes(c))){
-   if(s==='SPX'||s==='SPX500')s='OANDA:SPX500_USD';
-   else if(s==='NAS'||s==='NAS100'||s==='NDX')s='OANDA:NAS100_USD';
-   else if(s==='JP225'||s==='N225')s='OANDA:JP225_USD';
-   else if(s==='US30'||s==='DJI')s='OANDA:US30_USD';
-   else s='OANDA:'+s.replace(/[/_-]/g,'_');
+ if(src==='tv'){
+  if(!s.includes(':')){
+   if(s==='SPX'||s==='SPX500')s='FOREXCOM:SPX500';
+   else if(s==='NAS'||s==='NAS100'||s==='NDX')s='FOREXCOM:NAS100';
+   else if(s==='JP225'||s==='N225')s='OANDA:JP225USD';
+   else if(s==='US30'||s==='DJI')s='FOREXCOM:DJI';
+   else if(s.includes('/')||['EUR','GBP','JPY','AUD','CAD','CHF','NZD','XAU','XAG'].some(c=>s.includes(c))){
+    s='OANDA:'+s.replace(/[/_-]/g,'');
+   }
   }
  }
  if(src==='gate'){
@@ -524,7 +524,7 @@ function playChime(){
 function plan(){
  const p=tfParse(S.tf)||{min:60,label:'1h'};
  S.tf=p.label;tfmin=p.min;tfms=tfmin*6e4;
- const nat=S.src==='bn'?NB:S.src==='fx'?NF:S.src==='fh'?NFh:NG;
+ const nat=S.src==='bn'?NB:S.src==='fx'?NF:NG;
  if(nat[tfmin])base=tfmin;
  else base=Object.keys(nat).map(Number).sort((a,b)=>b-a).find(b=>b<tfmin&&tfmin%b===0)||1;
  return nat[base];
@@ -588,53 +588,6 @@ async function fetchTd(sym,iv,size,endT){
  return j.values.map(v=>{let s=v.datetime;s=s.length<11?s+'T00:00:00Z':s.replace(' ','T')+'Z';return{t:Date.parse(s),o:+v.open,h:+v.high,l:+v.low,c:+v.close}});
 }
 
-async function fetchFh(sym,iv,count,endT){
- const k=cfg.fhKey;
- if(!k)throw Error('Finnhub API key required. Add it in ⚙ Settings');
- const to=endT?Math.floor(endT/1000):Math.floor(Date.now()/1000);
- let spanSec=86400*30;
- if(iv==='1')spanSec=86400*3;
- else if(iv==='5')spanSec=86400*7;
- else if(iv==='15')spanSec=86400*14;
- else if(iv==='30')spanSec=86400*30;
- else if(iv==='60')spanSec=86400*60;
- else if(iv==='D')spanSec=86400*365;
- else if(iv==='W')spanSec=86400*365*3;
- else if(iv==='M')spanSec=86400*365*10;
- const from=to-spanSec;
-
- let s=sym.toUpperCase().trim();
- let endpoint='forex';
- if(s.startsWith('OANDA:')||s.includes('_')||s.includes('/')){
-  endpoint='forex';
-  if(!s.startsWith('OANDA:'))s='OANDA:'+s.replace('/','_');
- }else{
-  endpoint='stock';
- }
-
- let url=`https://finnhub.io/api/v1/${endpoint}/candle?symbol=${encodeURIComponent(s)}&resolution=${iv}&from=${from}&to=${to}&token=${encodeURIComponent(k)}`;
- let r=await fetch(url);
- let j=await r.json();
-
- if(j.s==='no_data'&&endpoint==='forex'){
-  url=`https://finnhub.io/api/v1/stock/candle?symbol=${encodeURIComponent(sym)}&resolution=${iv}&from=${from}&to=${to}&token=${encodeURIComponent(k)}`;
-  r=await fetch(url);
-  j=await r.json();
- }
-
- if(j.s!=='ok'||!Array.isArray(j.t)||!j.t.length){
-  if(j.error)throw Error(j.error);
-  throw Error('No data from Finnhub for '+sym);
- }
-
- return j.t.map((ts,i)=>({
-  t:ts*1000,
-  o:+j.o[i],
-  h:+j.h[i],
-  l:+j.l[i],
-  c:+j.c[i]
- }));
-}
 
 function checkAlerts(b){
  if(!alerts.length)return;
@@ -748,18 +701,27 @@ async function load(){
  const my=++loadId;
  if(ws){ws.onclose=null;ws.close();ws=null}
  clearInterval(poll);
+ 
+ if(S.src==='tv'){
+  $('tv-box').hidden=false;
+  $('ohlc').innerHTML='';
+  status('');
+  renderTvWidget(S.sym, S.tf);
+  return;
+ }else{
+  $('tv-box').hidden=true;
+ }
+ 
  status('Loading…');
  const iv=plan();
  try{
   if(S.src==='bn'){
-    raw=await fetchBn(S.sym,iv,base===tfmin?2:4);
-   }else if(S.src==='gate'){
-    raw=await fetchGate(S.sym,iv,base===tfmin?2:4);
-   }else if(S.src==='fh'){
-    raw=await fetchFh(S.sym,iv,500);
-   }else{
-    raw=await fetchTd(S.sym,iv,5000);
-   }
+   raw=await fetchBn(S.sym,iv,base===tfmin?2:4);
+  }else if(S.src==='gate'){
+   raw=await fetchGate(S.sym,iv,base===tfmin?2:4);
+  }else{
+   raw=await fetchTd(S.sym,iv,5000);
+  }
   if(my!==loadId)return;
   if(!raw.length)throw Error('No data for '+S.sym);
   vShift=0;vZoom=1;
@@ -808,9 +770,7 @@ function live(my,iv){
    ws.onclose=()=>{clearInterval(ping);if(my===loadId)setTimeout(()=>my===loadId&&open(),2500)};
    ws.onerror=()=>{try{ws.close()}catch{}};
   };open();
- }else if(S.src==='fh'){
-   poll=setInterval(async()=>{try{(await fetchFh(S.sym,iv,2)).forEach(upsert)}catch{}},15000);
-  }else{
+ }else{
    poll=setInterval(async()=>{try{(await fetchTd(S.sym,iv,2)).forEach(upsert)}catch{}},20000);
   }
 }
@@ -825,6 +785,17 @@ function setSym(src,sym,tf){
  exitRp();tfUI();wlRender();load();
 }
 
+function renderTvWidget(sym, tf){
+ const ivMap = {'1m':'1','3m':'3','5m':'5','15m':'15','30m':'30','1h':'60','2h':'120','4h':'240','1d':'D','1w':'W','1M':'M'};
+ const iv = ivMap[tf] || '60';
+ const cleanSym = normSym('tv', sym);
+ $('tv-box').innerHTML = `
+  <iframe style="width:100%;height:100%;border:none" 
+   src="https://s.tradingview.com/widgetembed/?symbol=${encodeURIComponent(cleanSym)}&interval=${iv}&theme=dark&style=1&locale=en&toolbar_bg=%230e1117&enable_publishing=false&hide_top_toolbar=0&save_image=false&container_id=tv-box"
+   allowtransparency="true" scrolling="no" allowfullscreen>
+  </iframe>
+ `;
+}
 /* ---------- Drawing Engine & Interactive Manipulation ---------- */
 function render(d,isSel){
  ctx.strokeStyle=ctx.fillStyle=d.color;ctx.lineWidth=d.w;ctx.setLineDash([]);
@@ -1528,16 +1499,16 @@ function renderSearchResults(query=''){
   if(curBrk==='gate'&&!p.sym)continue;
   if(curBrk==='bn'&&!p.bn)continue;
   if(curBrk==='fx'&&!p.fx)continue;
-  if(curBrk==='fh'&&!p.fh)continue;
+  if(curBrk==='tv'&&!p.tv)continue;
 
   let targetSrc = p.src || 'gate';
   if(curBrk==='gate')targetSrc='gate';
   else if(curBrk==='bn')targetSrc='bn';
   else if(curBrk==='fx')targetSrc='fx';
-  else if(curBrk==='fh')targetSrc='fh';
-  else if(p.fh && (p.cat==='fx'||p.name.includes('Index')||p.name.includes('225')||p.name.includes('500')||p.name.includes('100')||p.name.includes('30')))targetSrc='fh';
+  else if(curBrk==='tv')targetSrc='tv';
+  else if(p.tv && (p.cat==='fx'||p.name.includes('Index')||p.name.includes('225')||p.name.includes('500')||p.name.includes('100')||p.name.includes('30')))targetSrc='tv';
 
-  let displaySym = (targetSrc==='fh'&&p.fh) ? p.fh : (targetSrc==='bn'&&p.bn) ? p.bn : (targetSrc==='fx'&&p.fx) ? p.fx : (p.sym||p.fx||p.fh||p.bn);
+  let displaySym = (targetSrc==='tv'&&p.tv) ? p.tv : (targetSrc==='bn'&&p.bn) ? p.bn : (targetSrc==='fx'&&p.fx) ? p.fx : (p.sym||p.fx||p.tv||p.bn);
   const k = (targetSrc + ':' + displaySym).toUpperCase();
   if(!seen.has(k)){
    seen.add(k);
@@ -1564,13 +1535,13 @@ function renderSearchResults(query=''){
  }).slice(0,60);
  
  if(!filtered.length){
-  const fallbackSrc = curBrk!=='all'?curBrk:(curCat==='fx'?'fx':S.src);
-  $('search-results').innerHTML=`<div style="padding:16px;text-align:center;color:#8a919e">No preset found. Press Enter to load <b>"${query.toUpperCase()}"</b> directly via ${fallbackSrc==='gate'?'Gate.io':fallbackSrc==='bn'?'Binance':fallbackSrc==='fh'?'Finnhub':'Twelve Data'}.</div>`;
+  const fallbackSrc = curBrk!=='all'?curBrk:(curCat==='fx'?'tv':S.src);
+  $('search-results').innerHTML=`<div style="padding:16px;text-align:center;color:#8a919e">No preset found. Press Enter to load <b>"${query.toUpperCase()}"</b> directly via ${fallbackSrc==='gate'?'Gate.io':fallbackSrc==='bn'?'Binance':fallbackSrc==='tv'?'TradingView':'Twelve Data'}.</div>`;
   return;
  }
  
  $('search-results').innerHTML=filtered.map(p=>{
-  const brkLabel = p.src==='gate'?'Gate.io':p.src==='bn'?'Binance':p.src==='fh'?'Finnhub':'Twelve Data';
+  const brkLabel = p.src==='gate'?'Gate.io':p.src==='bn'?'Binance':p.src==='tv'?'TradingView':'Twelve Data';
   return `
   <div class="s-item" data-sym="${p.sym}" data-src="${p.src}">
    ${symBadge(p.sym,p.src)}
@@ -1603,7 +1574,7 @@ $('search-input').onkeydown=e=>{
    if(first){
     first.click();
    }else{
-    const targetSrc=curBrk!=='all'?curBrk:(curCat==='fx'?'fx':S.src);
+    const targetSrc=curBrk!=='all'?curBrk:(curCat==='fx'?'tv':S.src);
     setSym(targetSrc,val);
     $('search-modal').hidden=true;
    }
@@ -1645,7 +1616,7 @@ $('search-results').onclick=e=>{
 
 $('src').onchange=()=>{
  const v=$('src').value;
- setSym(v,v==='gate'?'BTC_USDT':v==='bn'?'BTCUSDT':v==='fh'?'OANDA:SPX500_USD':'EUR/USD');
+ setSym(v,v==='gate'?'BTC_USDT':v==='bn'?'BTCUSDT':v==='tv'?'FOREXCOM:SPX500':'EUR/USD');
 };
 
 /* ---------- Alerts Modal & Management ---------- */
@@ -1689,7 +1660,7 @@ const SPEC=[
  ['bg','color','Background Color'],['grid','color','Grid Line Color'],
  ['fvgOn','check','Show Fair Value Gaps (FVG)'],['fvgUp','color','Bullish FVG Color'],['fvgDn','color','Bearish FVG Color'],
  ['fvgOp','range','FVG Box Opacity'],['fvgMin','number','Min FVG Size (%)'],['fvgMax','number','Max FVG Boxes'],['fvgMit','check','Show Mitigated FVGs'],
- ['gapFree','check','Gap-Free Candles'],['fhKey','text','Finnhub API Key (Forex/Indices/CFD)'],['key','text','Twelve Data Key (Forex/Stocks)']
+ ['gapFree','check','Gap-Free Candles'],['key','text','Twelve Data Key (Forex/Stocks)']
 ];
 
 $('setbody').innerHTML='<b style="font-size:14px;color:#fff;display:block;margin-bottom:10px">Chart Settings</b>'+SPEC.map(s=>`
@@ -1697,7 +1668,7 @@ $('setbody').innerHTML='<b style="font-size:14px;color:#fff;display:block;margin
   <input data-k="${s[0]}" type="${s[1]==='check'?'checkbox':s[1]}" ${s[1]==='range'?'min=".05" max=".8" step=".05"':''} ${s[1]==='number'?'step="any" style="width:80px"':''}>
  </label>
 `).join('')+
- '<p>Crypto runs natively with Gate.io & Binance live WebSockets. Forex uses Twelve Data (EUR/USD works free in demo mode; add your personal key from twelvedata.com for full catalog).</p><button id="sclose" style="margin-top:12px;width:100%;padding:8px">Done</button>';
+ '<p>TradingView mode streams live broker feeds for all Forex & Indices. Crypto runs natively with Gate.io & Binance. Forex can also use Twelve Data with your personal key.</p><button id="sclose" style="margin-top:12px;width:100%;padding:8px">Done</button>';
 
 document.querySelectorAll('#setbody [data-k]').forEach(i=>{
  const k=i.dataset.k;
@@ -1706,7 +1677,7 @@ document.querySelectorAll('#setbody [data-k]').forEach(i=>{
   cfg[k]=i.type==='checkbox'?i.checked:(i.type==='number'||i.type==='range')?+i.value:i.value;
   SV('cfg',cfg);
   if(k==='fvgOn')$('fvgtog').classList.toggle('on',cfg.fvgOn);
-  if(k==='key'||k==='fhKey'){if(S.src==='fx'||S.src==='fh')load()}else{rebuild();sched()}
+  if(k==='key'){if(S.src==='fx')load()}else{rebuild();sched()}
  };
 });
 
@@ -1725,7 +1696,7 @@ function wlRender(){
    ${symBadge(x.sym,x.src)}
    <div class="sym-info">
     <div class="sym-name">${x.sym}</div>
-    <div class="sym-src">${x.src==='gate'?'Gate.io':x.src==='bn'?'Binance':x.src==='fh'?'Finnhub':'Twelve Data'}</div>
+    <div class="sym-src">${x.src==='gate'?'Gate.io':x.src==='bn'?'Binance':x.src==='tv'?'TradingView':'Twelve Data'}</div>
    </div>
    <div class="sym-price" id="wp${i}">
     <span class="p-val">--</span>
@@ -1790,20 +1761,7 @@ async function wlPrices(){
    }
   }catch{}
  }
- // Finnhub symbols (Forex, Indices, Stocks)
- const fhIdx=L.map((x,i)=>x.src==='fh'?i:-1).filter(i=>i>=0);
- for(const i of fhIdx){
-  try{
-   const r=await fetch(`https://finnhub.io/api/v1/quote?symbol=${encodeURIComponent(L[i].sym)}&token=${cfg.fhKey||''}`);
-   const q=await r.json();
-   if(q&&q.c&&$('wp'+i)){
-    const last=+q.c;
-    const c=+q.dp||0;
-    $('wp'+i).innerHTML=`<span class="p-val">${fmt(last)}</span><span class="p-chg ${c>=0?'up':'dn'}">${c>=0?'+':''}${c.toFixed(2)}%</span>`;
-   }
-  }catch{}
  }
-}
 
 $('wi').onclick=e=>{
  const d=e.target.closest('[data-d]');
@@ -1859,7 +1817,6 @@ async function loadMore(){
   const e=raw[0].t-1;let a=[];
   if(S.src==='bn')a=await fetchBn(S.sym,NB[base],4,e);
    else if(S.src==='gate')a=await fetchGate(S.sym,NG[base]||'1h',4,e);
-   else if(S.src==='fh')a=await fetchFh(S.sym,NFh[base]||'60',500,e);
    else a=await fetchTd(S.sym,NF[base],5000,e);
   const have=new Set(raw.map(b=>b.t)),add=a.filter(b=>!have.has(b.t));
   if(!add.length){status('No older data available');setTimeout(()=>status(''),2500);return}
