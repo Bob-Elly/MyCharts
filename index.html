@@ -134,7 +134,102 @@ button.on{background:#2962ff;border-color:#2962ff;color:#fff}
 #wl{display:none;position:fixed;left:0;right:0;bottom:48px;max-height:60vh;border-top:1px solid #2a3342;z-index:90;box-shadow:0 -6px 20px rgba(0,0,0,.5)}
 #wl.open{display:flex}
 }
-</style></head><body>
+
+/* --- TradingView Pro Layout Upgrades --- */
+#app{display:grid;grid-template-columns:1fr 280px;grid-template-rows:44px 1fr;height:100%;width:100%;background:#131722;transition:grid-template-columns .2s ease}
+#app.wl-collapsed{grid-template-columns:1fr 0px}
+
+/* Top bar: TradingView clean pro header */
+#top{grid-column:1/3;display:flex;align-items:center;gap:6px;padding:0 12px;background:#131722;border-bottom:1px solid #2a2e39;overflow-x:auto;white-space:nowrap;z-index:15}
+#brand{display:flex;align-items:center;gap:6px;font-weight:700;font-size:14px;padding-right:12px;border-right:1px solid #2a2e39;cursor:pointer}
+#sym-btn{display:flex;align-items:center;gap:6px;font-weight:600;padding:5px 10px;background:#1e222d;border:1px solid #2a2e39;border-radius:6px;cursor:pointer;color:#fff}
+#sym-btn:hover{background:#2a2e39;border-color:#2962ff}
+
+/* Floating Toolbar: Draggable horizontal pill on Desktop (Image 1), vertical pill on Mobile (Image 2) */
+#tools{position:absolute;top:12px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:3px;background:rgba(19,23,34,.94);backdrop-filter:blur(8px);border:1px solid #2a2e39;border-radius:8px;padding:4px 8px;box-shadow:0 8px 24px rgba(0,0,0,.6);z-index:25;user-select:none}
+.drag-handle{cursor:grab;color:#6b7280;font-size:14px;letter-spacing:1px;padding:2px 4px;display:flex;align-items:center;justify-content:center}
+.drag-handle:active{cursor:grabbing}
+#tools button,#tools .tool-btn{width:32px;height:32px;padding:0;display:flex;align-items:center;justify-content:center;border-radius:5px;border:1px solid transparent;background:transparent;color:#9aa3b2;cursor:pointer;transition:all .15s}
+#tools button:hover{background:#2a2e39;color:#fff}
+#tools button.on{background:#2962ff;border-color:#2962ff;color:#fff;box-shadow:0 0 10px rgba(41,98,255,.45)}
+#tools .sep{width:1px;height:20px;background:#2a2e39;margin:0 4px}
+#tools select{width:36px;padding:2px;font-size:11px;background:#1e222d;border:1px solid #2a2e39;color:#fff;border-radius:4px}
+#tools input[type=color]{width:28px;height:22px;padding:0;border:none;border-radius:4px;cursor:pointer}
+
+/* Right Watchlist Panel (Image 1 Style) */
+#wl{background:#131722;border-left:1px solid #2a2e39;display:flex;flex-direction:column;height:100%;overflow:hidden;z-index:10}
+#wl-head{display:flex;align-items:center;gap:6px;padding:10px 12px;border-bottom:1px solid #2a2e39;background:#131722}
+#wl-head .wl-title{font-weight:700;font-size:13px;color:#fff;flex:1;letter-spacing:-0.2px}
+#wl-head button{background:#1e222d;border:1px solid #2a2e39;color:#c9ced8;border-radius:4px;padding:3px 8px;cursor:pointer}
+#wl-head button:hover{background:#2a2e39;color:#fff}
+
+#wl-cols{display:flex;align-items:center;padding:6px 12px;font-size:11px;font-weight:600;color:#6b7280;border-bottom:1px solid #1e222d}
+#wl-cols span:nth-child(1){flex:1}
+#wl-cols span:nth-child(2){width:70px;text-align:right}
+#wl-cols span:nth-child(3){width:60px;text-align:right}
+
+#wi{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:1px;padding:4px}
+.wi{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:6px;cursor:pointer;transition:background .15s;font-size:12px}
+.wi:hover{background:#1e222d}
+.wi.active{background:#1c2438;border:1px solid #2962ff}
+
+/* Bottom Active Symbol Detail Card (Image 1) */
+#wl-detail{border-top:1px solid #2a2e39;background:#131722;padding:12px;display:flex;flex-direction:column;gap:6px}
+.wld-head{display:flex;flex-direction:column}
+.wld-title{font-weight:700;font-size:14px;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wld-tag{font-size:11px;color:#8a919e;margin-top:1px}
+.wld-price-row{display:flex;align-items:baseline;gap:8px;margin-top:4px}
+.wld-price{font-size:22px;font-weight:700;color:#fff;letter-spacing:-0.5px}
+.wld-chg{font-size:12px;font-weight:600;padding:2px 6px;border-radius:4px}
+.wld-chg.up{background:rgba(38,166,154,.2);color:#26a69a}
+.wld-chg.dn{background:rgba(239,83,80,.2);color:#ef5350}
+.wld-status{font-size:11px;color:#8a919e;display:flex;align-items:center;gap:5px}
+.wld-dot{width:7px;height:7px;border-radius:50%;background:#26a69a;display:inline-block}
+
+/* Mobile Slider & Mobile Bottom Nav (Image 2) */
+#mobile-slider{display:none}
+#mobile-nav{display:none}
+#tf-modal{position:fixed;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:flex-end;justify-content:center;z-index:999;backdrop-filter:blur(4px)}
+#tf-modal[hidden]{display:none}
+#tf-box{background:#131722;border:1px solid #2a2e39;border-radius:14px 14px 0 0;width:100%;max-width:500px;padding:16px;display:flex;flex-direction:column;gap:12px;box-shadow:0 -10px 30px rgba(0,0,0,.6)}
+.tf-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.tf-grid button{padding:10px 0;font-size:13px;font-weight:600;border-radius:6px;background:#1e222d;border:1px solid #2a2e39;color:#c9ced8;cursor:pointer}
+.tf-grid button.on{background:#2962ff;border-color:#2962ff;color:#fff}
+
+/* --- Mobile Breakpoint (<= 768px) --- */
+@media(max-width:768px){
+ #app{grid-template-columns:1fr;grid-template-rows:44px 1fr auto auto;height:100%}
+ #app.wl-collapsed{grid-template-columns:1fr}
+ #top{grid-column:1;display:flex;align-items:center;justify-content:space-between;padding:0 10px}
+ #brand{border-right:none;padding-right:0}
+ #tfs,#ctf,#alert-btn,#rpbtn,#more,#gear,#wtog,#st{display:none !important}
+ 
+ /* Left floating vertical toolbar (Image 2 style) */
+ #tools{position:absolute;top:60px;left:10px;transform:none;flex-direction:column;padding:6px 4px;border-radius:8px;gap:4px;z-index:25}
+ #tools .sep{width:20px;height:1px;margin:3px 0}
+ #tools select,#tools input[type=color]{display:none}
+ 
+ /* Mobile Sliding Strip (above bottom nav, like Image 2) */
+ #mobile-slider{display:flex;align-items:center;gap:6px;padding:6px 10px;background:#131722;border-top:1px solid #2a2e39;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;z-index:20}
+ #m-slider-inner{display:flex;align-items:center;gap:6px;flex:1;overflow-x:auto;scrollbar-width:none}
+ .m-chip{display:flex;align-items:center;gap:6px;padding:5px 12px;background:#1e222d;border:1px solid #2a2e39;border-radius:20px;font-size:12px;font-weight:600;color:#c9ced8;cursor:pointer;white-space:nowrap;flex-shrink:0}
+ .m-chip.active{background:#2962ff;border-color:#2962ff;color:#fff}
+ .m-chip-tf{font-size:10px;opacity:.8;padding:1px 4px;background:rgba(0,0,0,.25);border-radius:4px}
+ #m-quick-edit{background:#1e222d;border:1px solid #2a2e39;border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;color:#9aa3b2;flex-shrink:0;cursor:pointer}
+
+ /* Mobile Bottom Navigation Tabs (Image 2 style) */
+ #mobile-nav{display:flex;align-items:center;justify-content:space-around;height:52px;background:#131722;border-top:1px solid #2a2e39;padding-bottom:env(safe-area-inset-bottom);z-index:20}
+ .mnav-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:transparent;border:none;color:#8a919e;font-size:10px;font-weight:500;padding:4px 10px;cursor:pointer;flex:1}
+ .mnav-btn svg{width:18px;height:18px}
+ .mnav-btn.on{color:#2962ff}
+ 
+ /* Fullscreen slide-up Watchlist on mobile */
+ #wl{position:fixed;inset:0;top:44px;bottom:52px;z-index:90;display:none;background:#131722;border-left:none}
+ #wl.open{display:flex}
+}
+
+</style><script src="https://s3.tradingview.com/tv.js"></script>
+</head><body>
 <div id="app">
 <div id="top">
  <div id="brand" title="MyCharts">
@@ -184,10 +279,9 @@ button.on{background:#2962ff;border-color:#2962ff;color:#fff}
 </div>
 
 <!-- Left Toolbar (TradingView SVG Icons) -->
-<div id="tools"></div>
-
 <!-- Chart Canvas -->
 <div id="cw">
+ <div id="tools"></div>
  <div id="tv-box" style="position:absolute;inset:0;width:100%;height:100%;z-index:3;background:#0e1117" hidden></div>
  <canvas id="cv"></canvas>
  <div id="ohlc"></div>
@@ -210,14 +304,79 @@ button.on{background:#2962ff;border-color:#2962ff;color:#fff}
 <!-- Right Watchlist Panel -->
 <div id="wl">
  <div id="wl-head">
-  <select id="wsel" style="flex:1;font-size:11px"></select>
-  <button id="wnew" title="New watchlist" style="padding:2px 7px">+</button>
+  <span class="wl-title">Watchlist</span>
+  <select id="wsel" style="max-width:110px;font-size:11px"></select>
+  <button id="wnew" title="New watchlist">+</button>
+  <button id="wadd" title="Add Current Symbol">+</button>
+ </div>
+ <div id="wl-cols">
+  <span>Symbol</span>
+  <span>Last</span>
+  <span>Chg%</span>
  </div>
  <div id="wi"></div>
- <div id="wl-foot">
-  <button id="wadd">+ Add Current Symbol</button>
+ <div id="wl-detail">
+  <div class="wld-head">
+   <div class="wld-title" id="wld-name">Bitcoin / Tether</div>
+   <div class="wld-tag" id="wld-tag">Crypto · Gate.io</div>
+  </div>
+  <div class="wld-price-row">
+   <div class="wld-price" id="wld-price">--</div>
+   <div class="wld-chg up" id="wld-chg">--</div>
+  </div>
+  <div class="wld-status"><span class="wld-dot"></span> <span id="wld-market">Market open</span></div>
  </div>
 </div>
+
+<!-- Mobile Sliding Strip & Bottom Navigation Bar (Image 2) -->
+<div id="mobile-slider">
+ <button id="m-quick-edit" title="Toggle Drawing Tools">✏️</button>
+ <div id="m-slider-inner"></div>
+</div>
+
+<div id="mobile-nav">
+ <button class="mnav-btn" id="mnav-wl" data-tab="wl">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+  <span>Watchlist</span>
+ </button>
+ <button class="mnav-btn on" id="mnav-chart" data-tab="chart">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+  <span>Chart</span>
+ </button>
+ <button class="mnav-btn" id="mnav-tf" data-tab="tf">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+  <span>Timeframe</span>
+ </button>
+ <button class="mnav-btn" id="mnav-alert" data-tab="alert">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+  <span>Alerts</span>
+ </button>
+ <button class="mnav-btn" id="mnav-menu" data-tab="menu">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+  <span>Menu</span>
+ </button>
+</div>
+
+<!-- Mobile Timeframe Picker Bottom Sheet -->
+<div id="tf-modal" hidden>
+ <div id="tf-box">
+  <div style="display:flex;justify-content:space-between;align-items:center">
+   <b style="color:#fff;font-size:14px">Select Timeframe</b>
+   <button id="tf-close" style="background:transparent;border:none;font-size:16px;cursor:pointer">✕</button>
+  </div>
+  <div class="tf-grid" id="tf-grid">
+   <button data-tf="1m">1m</button>
+   <button data-tf="5m">5m</button>
+   <button data-tf="15m">15m</button>
+   <button data-tf="30m">30m</button>
+   <button data-tf="1h">1h</button>
+   <button data-tf="4h">4h</button>
+   <button data-tf="1d">1D</button>
+   <button data-tf="1w">1W</button>
+  </div>
+ </div>
+</div>
+
 </div>
 
 <!-- Fixed Symbol Search Modal (Never Clipped) -->
@@ -791,7 +950,7 @@ function renderTvWidget(sym, tf){
  const cleanSym = normSym('tv', sym);
  $('tv-box').innerHTML = `
   <iframe style="width:100%;height:100%;border:none" 
-   src="https://s.tradingview.com/widgetembed/?symbol=${encodeURIComponent(cleanSym)}&interval=${iv}&theme=dark&style=1&locale=en&toolbar_bg=%230e1117&enable_publishing=false&hide_top_toolbar=0&save_image=false&container_id=tv-box"
+   src="https://s.tradingview.com/widgetembed/?symbol=${encodeURIComponent(cleanSym)}&interval=${iv}&theme=dark&style=1&locale=en&toolbar_bg=%23131722&hide_side_toolbar=0&withdateranges=1&allow_symbol_change=1&details=1&hotlist=1&container_id=tv-box"
    allowtransparency="true" scrolling="no" allowfullscreen>
   </iframe>
  `;
@@ -1434,7 +1593,9 @@ function setTool(t){
 }
 
 function renderToolsUI(){
- $('tools').innerHTML=TOOLS.map(t=>`<button data-t="${t[0]}" class="${tool===t[0]?'on':''}" title="${t[2]}">${t[1]}</button>`).join('')+
+ $('tools').innerHTML = `
+  <div class="drag-handle" id="tools-drag" title="Drag toolbar">⋮⋮</div>
+ ` + TOOLS.map(t=>`<button data-t="${t[0]}" class="${tool===t[0]?'on':''}" title="${t[2]}">${t[1]}</button>`).join('')+
  `<div class="sep"></div>`+
  `<button id="magnet" class="${magnetOn?'on':''}" title="Magnet Mode (Snaps crosshair & drawings to OHLC)">
    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4v7a8 8 0 0 0 16 0V4"/><line x1="4" y1="8" x2="8" y2="8"/><line x1="16" y1="8" x2="20" y2="8"/></svg>
@@ -1442,32 +1603,60 @@ function renderToolsUI(){
  `<div class="sep"></div>`+
  `<select id="w" title="Line Thickness">${[1,2,3,4,5,6].map(n=>`<option ${n===2?'selected':''}>${n}px</option>`).join('')}</select>`+
  `<input id="col" type="color" value="#2962ff" title="Drawing Color">`+
- `<button id="und" title="Undo (Ctrl+Z)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 14L4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5v0a5.5 5.5 0 0 1-5.5 5.5H11"/></svg></button>`+
- `<button id="red" title="Redo (Ctrl+Y)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 14l5-5-5-5"/><path d="M20 9H9.5A5.5 5.5 0 0 0 4 14.5v0A5.5 5.5 0 0 0 9.5 20H13"/></svg></button>`+
- `<button id="del" title="Delete Selected Drawing"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>`+
- `<button id="clr" title="Clear All Drawings"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>`;
-
+ `<button id="clr" title="Clear All Drawings">🗑</button>`;
+ 
  $('tools').onclick=e=>{
-  const b=e.target.closest('[data-t]');if(b)setTool(b.dataset.t);
+  const b=e.target.closest('[data-t]');
+  if(b)setTool(b.dataset.t);
  };
  $('magnet').onclick=()=>{
   magnetOn=!magnetOn;SV('magnetOn',magnetOn);$('magnet').classList.toggle('on',magnetOn);
-  status(magnetOn?'Magnet Pin Mode ON':'Magnet Mode OFF');setTimeout(()=>status(''),2000);
+  status(magnetOn?'Magnet Mode ON':'Magnet Mode OFF');setTimeout(()=>status(''),2000);
   sched();
  };
  $('w').onchange=e=>{dw=+e.target.value.replace('px','');if(sel){snap();sel.w=dw;saveDr();sched()}};
  $('col').oninput=e=>{dcol=e.target.value;if(sel){if(!cs){snap();cs=1}sel.color=dcol;saveDr();sched()}};
- $('col').onchange=()=>{cs=0};
- $('und').onclick=undo;
- $('red').onclick=redo;
- $('del').onclick=()=>{if(sel){snap();drs=drs.filter(d=>d!==sel);sel=null;$('dr-menu').hidden=true;saveDr();sched()}};
- 
- // Clear drawings WITHOUT disabling future drawings!
  $('clr').onclick=()=>{
-  snap();drs=[];sel=null;draft=null;drag=null;$('dr-menu').hidden=true;saveDr();
+  if(!drs.length)return;
+  snap();drs=[];sel=null;draft=null;$('dr-menu').hidden=true;saveDr();
   status('All drawings cleared');setTimeout(()=>status(''),2000);
   sched();
  };
+ 
+ // Make floating toolbar draggable on Desktop & Mobile
+ const tb=$('tools'),dh=$('tools-drag');
+ if(dh){
+  let isDragging=false,startX,startY,initialX,initialY;
+  const onStart=e=>{
+   isDragging=true;
+   const pt=e.touches?e.touches[0]:e;
+   startX=pt.clientX;startY=pt.clientY;
+   const rect=tb.getBoundingClientRect();
+   initialX=rect.left;initialY=rect.top;
+   document.addEventListener('mousemove',onMove);
+   document.addEventListener('mouseup',onEnd);
+   document.addEventListener('touchmove',onMove,{passive:false});
+   document.addEventListener('touchend',onEnd);
+  };
+  const onMove=e=>{
+   if(!isDragging)return;
+   if(e.cancelable)e.preventDefault();
+   const pt=e.touches?e.touches[0]:e;
+   const dx=pt.clientX-startX,dy=pt.clientY-startY;
+   tb.style.left=(initialX+dx)+'px';
+   tb.style.top=(initialY+dy)+'px';
+   tb.style.transform='none';
+  };
+  const onEnd=()=>{
+   isDragging=false;
+   document.removeEventListener('mousemove',onMove);
+   document.removeEventListener('mouseup',onEnd);
+   document.removeEventListener('touchmove',onMove);
+   document.removeEventListener('touchend',onEnd);
+  };
+  dh.addEventListener('mousedown',onStart);
+  dh.addEventListener('touchstart',onStart,{passive:true});
+ }
 }
 
 function tfUI(){
@@ -1689,6 +1878,8 @@ $('set').onclick=e=>{if(e.target.id==='set')$('set').hidden=true};
 function wlRender(){
  $('wsel').innerHTML=Object.keys(wls).map(k=>`<option ${k===wcur?'selected':''}>${k}</option>`).join('');
  const list=wls[wcur]||[];
+ 
+ // 1. Render Desktop / Drawer Watchlist List
  $('wi').innerHTML=list.map((x,i)=>{
   const isActive=(x.src===S.src&&normSym(x.src,x.sym)===normSym(S.src,S.sym));
   return `
@@ -1705,6 +1896,30 @@ function wlRender(){
   </div>
   `;
  }).join('');
+ 
+ // 2. Render Mobile Sliding Strip (Image 2)
+ const sliderInner=$('m-slider-inner');
+ if(sliderInner){
+  sliderInner.innerHTML=list.map((x,i)=>{
+   const isActive=(x.src===S.src&&normSym(x.src,x.sym)===normSym(S.src,S.sym));
+   const clean=x.sym.replace(/[/_-]/g,'');
+   return `
+   <div class="m-chip ${isActive?'active':''}" data-i="${i}">
+    <span>${clean}</span>
+    <span class="m-chip-tf">${S.tf}</span>
+   </div>
+   `;
+  }).join('');
+ }
+ 
+ // 3. Update Active Symbol Detail Card (Image 1)
+ const activeObj=list.find(x=>x.src===S.src&&normSym(x.src,x.sym)===normSym(S.src,S.sym))||{src:S.src,sym:S.sym};
+ if($('wld-name')){
+  const preset=PRESETS.find(p=>(p.sym===S.sym||p.bn===S.sym||p.fx===S.sym||p.tv===S.sym));
+  $('wld-name').textContent=preset?preset.name:S.sym;
+  $('wld-tag').textContent=(activeObj.src==='tv'?'Forex/CFD · TradingView':activeObj.src==='gate'?'Crypto · Gate.io':activeObj.src==='bn'?'Crypto · Binance':'Forex · Twelve Data');
+ }
+ 
  wlPrices();
 }
 
@@ -1831,6 +2046,72 @@ $('rx').onclick=exitRp;
 
 cv.onpointercancel=e=>{ptrs.delete(e.pointerId);pinch=null;drag=null};
 if('serviceWorker' in navigator&&/^https?:/.test(location.protocol))navigator.serviceWorker.register('sw.js').catch(()=>{});
+
+
+// Mobile Sliding Strip Click (switches active pair)
+if($('mobile-slider')){
+ $('mobile-slider').onclick=e=>{
+  const chip=e.target.closest('.m-chip');
+  if(chip){
+   const idx=+chip.dataset.i;
+   const x=(wls[wcur]||[])[idx];
+   if(x)setSym(x.src,x.sym);
+  }
+ };
+}
+
+// Mobile Quick Edit button (toggles floating toolbar)
+if($('m-quick-edit')){
+ $('m-quick-edit').onclick=()=>{
+  const tb=$('tools');
+  tb.style.display=tb.style.display==='none'?'flex':'none';
+ };
+}
+
+// Mobile Bottom Navigation Tabs (Image 2)
+document.querySelectorAll('.mnav-btn').forEach(btn=>{
+ btn.onclick=()=>{
+  const tab=btn.dataset.tab;
+  document.querySelectorAll('.mnav-btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  if(tab==='wl'){
+   $('wl').classList.toggle('open');
+  }else if(tab==='chart'){
+   $('wl').classList.remove('open');
+   $('tf-modal').hidden=true;
+  }else if(tab==='tf'){
+   $('tf-modal').hidden=false;
+  }else if(tab==='alert'){
+   $('wl').classList.remove('open');
+   renderAlertsList();
+   $('alerts-modal').hidden=false;
+  }else if(tab==='menu'){
+   $('wl').classList.remove('open');
+   $('search-modal').hidden=false;
+   renderSearchResults('');
+  }
+ };
+});
+
+// Mobile Timeframe Picker Bottom Sheet Click
+if($('tf-grid')){
+ $('tf-grid').onclick=e=>{
+  const b=e.target.closest('[data-tf]');
+  if(b){
+   document.querySelectorAll('.tf-grid button').forEach(s=>s.classList.remove('on'));
+   b.classList.add('on');
+   S.tf=b.dataset.tf;
+   SV('S',S);
+   $('tf-modal').hidden=true;
+   $('mnav-chart').click();
+   tfUI();
+   wlRender();
+   load();
+  }
+ };
+ $('tf-close').onclick=()=>{$('tf-modal').hidden=true;$('mnav-chart').click()};
+ $('tf-modal').onclick=e=>{if(e.target.id==='tf-modal'){$('tf-modal').hidden=true;$('mnav-chart').click()}};
+}
 
 /* ---------- Bootstrap ---------- */
 function resize(){
