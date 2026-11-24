@@ -1,0 +1,4 @@
+# Ignore zip archives
+*.zip
+.DS_Store
+Thumbs.db
