@@ -146,9 +146,11 @@ button.on{background:#2962ff;border-color:#2962ff;color:#fff}
 #sym-btn:hover{background:#2a2e39;border-color:#2962ff}
 
 /* Floating Toolbar: Draggable horizontal pill on Desktop (Image 1), vertical pill on Mobile (Image 2) */
-#tools{position:absolute;top:12px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:3px;background:rgba(19,23,34,.94);backdrop-filter:blur(8px);border:1px solid #2a2e39;border-radius:8px;padding:4px 8px;box-shadow:0 8px 24px rgba(0,0,0,.6);z-index:25;user-select:none}
-.drag-handle{cursor:grab;color:#6b7280;font-size:14px;letter-spacing:1px;padding:2px 4px;display:flex;align-items:center;justify-content:center}
-.drag-handle:active{cursor:grabbing}
+#tools{position:absolute;top:12px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:3px;background:rgba(19,23,34,.94);backdrop-filter:blur(8px);border:1px solid #2a2e39;border-radius:8px;padding:4px 8px;box-shadow:0 8px 24px rgba(0,0,0,.6);z-index:25;user-select:none;touch-action:none}
+.drag-handle{cursor:grab;color:#6b7280;font-size:14px;padding:2px 4px;display:flex;align-items:center;justify-content:center;touch-action:none;user-select:none;flex-shrink:0}
+.drag-handle:hover{color:#fff}
+.drag-handle:active,#tools.dragging,#tools.dragging *{cursor:grabbing !important}
+#tools.dragging{box-shadow:0 12px 36px rgba(0,0,0,.8),0 0 0 1px #2962ff}
 #tools button,#tools .tool-btn{width:32px;height:32px;padding:0;display:flex;align-items:center;justify-content:center;border-radius:5px;border:1px solid transparent;background:transparent;color:#9aa3b2;cursor:pointer;transition:all .15s}
 #tools button:hover{background:#2a2e39;color:#fff}
 #tools button.on{background:#2962ff;border-color:#2962ff;color:#fff;box-shadow:0 0 10px rgba(41,98,255,.45)}
@@ -205,7 +207,8 @@ button.on{background:#2962ff;border-color:#2962ff;color:#fff}
  #tfs,#ctf,#alert-btn,#rpbtn,#more,#gear,#wtog,#st{display:none !important}
  
  /* Left floating vertical toolbar (Image 2 style) */
- #tools{position:absolute;top:60px;left:10px;transform:none;flex-direction:column;padding:6px 4px;border-radius:8px;gap:4px;z-index:25}
+ #tools{position:absolute;top:60px;left:10px;transform:none;flex-direction:column;padding:6px 4px;border-radius:8px;gap:4px;z-index:25;touch-action:none}
+ #tools .drag-handle{width:100%;height:18px}
  #tools .sep{width:20px;height:1px;margin:3px 0}
  #tools select,#tools input[type=color]{display:none}
  
@@ -1752,7 +1755,13 @@ function setTool(t){
 
 function renderToolsUI(){
  $('tools').innerHTML = `
-  <div class="drag-handle" id="tools-drag" title="Drag toolbar">⋮⋮</div>
+  <div class="drag-handle" id="tools-drag" title="Drag toolbar">
+   <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+    <circle cx="5" cy="3" r="1.5"/><circle cx="11" cy="3" r="1.5"/>
+    <circle cx="5" cy="8" r="1.5"/><circle cx="11" cy="8" r="1.5"/>
+    <circle cx="5" cy="13" r="1.5"/><circle cx="11" cy="13" r="1.5"/>
+   </svg>
+  </div>
  ` + TOOLS.map(t=>`<button data-t="${t[0]}" class="${tool===t[0]?'on':''}" title="${t[2]}">${t[1]}</button>`).join('')+
  `<div class="sep"></div>`+
  `<button id="magnet" class="${magnetOn?'on':''}" title="Magnet Mode (Snaps crosshair & drawings to OHLC)">
@@ -1781,39 +1790,97 @@ function renderToolsUI(){
   sched();
  };
  
- // Make floating toolbar draggable on Desktop & Mobile
- const tb=$('tools'),dh=$('tools-drag');
- if(dh){
-  let isDragging=false,startX,startY,initialX,initialY;
-  const onStart=e=>{
+ // Make floating toolbar draggable on Desktop & Mobile (Pointer Events with Pointer Capture)
+ const tb=$('tools');
+ if(tb){
+  let isDragging=false,grabOffsetX=0,grabOffsetY=0;
+
+  // Restore saved position if valid
+  const isMobile=window.innerWidth<=768;
+  const savedPos=localStorage.getItem(isMobile?'tbPos_m':'tbPos_d');
+  if(savedPos){
+   try{
+    const p=JSON.parse(savedPos);
+    if(p.left&&p.top){
+     tb.style.left=p.left;
+     tb.style.top=p.top;
+     tb.style.transform='none';
+    }
+   }catch(_){}
+  }
+
+  const onPointerDown=e=>{
+   // Only drag when using primary pointer button and NOT clicking on actionable buttons/inputs
+   if(e.button!==undefined&&e.button!==0)return;
+   if(e.target.closest('button, select, input'))return;
+
    isDragging=true;
-   const pt=e.touches?e.touches[0]:e;
-   startX=pt.clientX;startY=pt.clientY;
-   const rect=tb.getBoundingClientRect();
-   initialX=rect.left;initialY=rect.top;
-   document.addEventListener('mousemove',onMove);
-   document.addEventListener('mouseup',onEnd);
-   document.addEventListener('touchmove',onMove,{passive:false});
-   document.addEventListener('touchend',onEnd);
+   tb.classList.add('dragging');
+   const tbRect=tb.getBoundingClientRect();
+   // Distance from cursor to top-left of toolbar
+   grabOffsetX=e.clientX-tbRect.left;
+   grabOffsetY=e.clientY-tbRect.top;
+
+   try{tb.setPointerCapture(e.pointerId);}catch(_){}
+   e.preventDefault();
   };
-  const onMove=e=>{
+
+  const onPointerMove=e=>{
    if(!isDragging)return;
-   if(e.cancelable)e.preventDefault();
-   const pt=e.touches?e.touches[0]:e;
-   const dx=pt.clientX-startX,dy=pt.clientY-startY;
-   tb.style.left=(initialX+dx)+'px';
-   tb.style.top=(initialY+dy)+'px';
+   const cw=$('cw');
+   const cwRect=cw.getBoundingClientRect();
+   const tbWidth=tb.offsetWidth||36;
+   const tbHeight=tb.offsetHeight||200;
+
+   // Position relative to #cw (offsetParent container)
+   let newLeft=e.clientX-grabOffsetX-cwRect.left;
+   let newTop=e.clientY-grabOffsetY-cwRect.top;
+
+   // Clamp within #cw bounds so toolbar is never lost or offscreen
+   const maxLeft=Math.max(4,cwRect.width-tbWidth-4);
+   const maxTop=Math.max(4,cwRect.height-tbHeight-4);
+   newLeft=Math.max(4,Math.min(maxLeft,newLeft));
+   newTop=Math.max(4,Math.min(maxTop,newTop));
+
+   tb.style.left=newLeft+'px';
+   tb.style.top=newTop+'px';
    tb.style.transform='none';
   };
-  const onEnd=()=>{
+
+  const onPointerUp=e=>{
+   if(!isDragging)return;
    isDragging=false;
-   document.removeEventListener('mousemove',onMove);
-   document.removeEventListener('mouseup',onEnd);
-   document.removeEventListener('touchmove',onMove);
-   document.removeEventListener('touchend',onEnd);
+   tb.classList.remove('dragging');
+   try{tb.releasePointerCapture(e.pointerId);}catch(_){}
+
+   // Save position
+   try{
+    const m=window.innerWidth<=768;
+    localStorage.setItem(m?'tbPos_m':'tbPos_d',JSON.stringify({
+     left:tb.style.left,
+     top:tb.style.top
+    }));
+   }catch(_){}
   };
-  dh.addEventListener('mousedown',onStart);
-  dh.addEventListener('touchstart',onStart,{passive:true});
+
+  tb.addEventListener('pointerdown',onPointerDown);
+  tb.addEventListener('pointermove',onPointerMove);
+  tb.addEventListener('pointerup',onPointerUp);
+  tb.addEventListener('pointercancel',onPointerUp);
+
+  // Keep within bounds on resize
+  window.addEventListener('resize',()=>{
+   const cw=$('cw');
+   if(!cw||!tb.style.left)return;
+   const cwRect=cw.getBoundingClientRect();
+   const curLeft=parseFloat(tb.style.left);
+   const curTop=parseFloat(tb.style.top);
+   if(isNaN(curLeft)||isNaN(curTop))return;
+   const maxLeft=Math.max(4,cwRect.width-(tb.offsetWidth||36)-4);
+   const maxTop=Math.max(4,cwRect.height-(tb.offsetHeight||200)-4);
+   tb.style.left=Math.max(4,Math.min(maxLeft,curLeft))+'px';
+   tb.style.top=Math.max(4,Math.min(maxTop,curTop))+'px';
+  });
  }
 }
 
