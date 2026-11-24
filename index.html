@@ -31,6 +31,10 @@ html,body{height:100%;width:100%;background:#0e1117;color:#c9ced8;font:13px syst
 #search-header{padding:10px;border-bottom:1px solid #232a36;background:#181e28;display:flex;gap:8px;align-items:center}
 #search-input{flex:1;padding:8px 12px;font-size:13px;background:#11151c;border:1px solid #2a3342;border-radius:6px;color:#fff;outline:none}
 #search-input:focus{border-color:#2962ff}
+#search-brokers{display:flex;gap:4px;padding:6px 10px;border-bottom:1px solid #232a36;background:#131822;overflow-x:auto}
+.sbrk{padding:3px 8px;font-size:10px;font-weight:600;border-radius:4px;cursor:pointer;background:#181e28;border:1px solid #283344;color:#9aa3b2;white-space:nowrap}
+.sbrk:hover{background:#232a36;color:#fff}
+.sbrk.on{background:#2962ff;border-color:#2962ff;color:#fff}
 #search-tabs{display:flex;gap:4px;padding:8px 10px;border-bottom:1px solid #232a36;background:#131822}
 .stab{padding:4px 10px;font-size:11px;font-weight:600;border-radius:4px;cursor:pointer;background:transparent;border:none;color:#9aa3b2}
 .stab.on{background:#2962ff;color:#fff}
@@ -158,7 +162,8 @@ button.on{background:#2962ff;border-color:#2962ff;color:#fff}
  <select id="src">
   <option value="gate">Gate.io</option>
   <option value="bn">Binance</option>
-  <option value="fx">Forex</option>
+  <option value="fx">Twelve Data</option>
+  <option value="fh">Finnhub</option>
  </select>
  
  <button id="sym-btn" title="Search symbol (TradingView style)">
@@ -224,8 +229,15 @@ button.on{background:#2962ff;border-color:#2962ff;color:#fff}
   </div>
   <div id="search-tabs">
    <button class="stab on" data-cat="all">All</button>
+   <button class="stab" data-cat="fx">Forex</button>
    <button class="stab" data-cat="crypto">Crypto</button>
-   <button class="stab" data-cat="fx">Forex & Metals</button>
+  </div>
+  <div id="search-brokers">
+   <button class="sbrk on" data-brk="all">All Brokers</button>
+   <button class="sbrk" data-brk="gate">Gate.io</button>
+   <button class="sbrk" data-brk="bn">Binance</button>
+   <button class="sbrk" data-brk="fx">Twelve Data</button>
+   <button class="sbrk" data-brk="fh">Finnhub</button>
   </div>
   <div id="search-results"></div>
  </div>
@@ -285,7 +297,7 @@ const SV=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch{}};
 
 const cfg=Object.assign({
  up:'#26a69a',dn:'#ef5350',wickUp:'#26a69a',wickDn:'#ef5350',bg:'#0e1117',grid:'#1a202b',
- fvgOn:true,fvgUp:'#2ecc71',fvgDn:'#e74c3c',fvgOp:0.25,fvgMin:0.02,fvgMax:30,fvgMit:false,gapFree:true,key:''
+ fvgOn:true,fvgUp:'#2ecc71',fvgDn:'#e74c3c',fvgOp:0.25,fvgMin:0.02,fvgMax:30,fvgMit:false,gapFree:true,key:'',fhKey:''
 },LS('cfg',{}));
 
 const S=Object.assign({src:'gate',sym:'BTC_USDT',tf:'1h'},LS('S',{}));
@@ -298,7 +310,8 @@ const wls=LS('wls',{
   {src:'gate',sym:'BNB_USDT'},
   {src:'gate',sym:'XRP_USDT'},
   {src:'fx',sym:'EUR/USD'},
-  {src:'fx',sym:'XAU/USD'}
+  {src:'fx',sym:'XAU/USD'},
+  {src:'fh',sym:'OANDA:SPX500_USD'}
  ]
 });
 let wcur=LS('wcur','Main');if(!wls[wcur])wcur=Object.keys(wls)[0];
@@ -306,12 +319,13 @@ let wcur=LS('wcur','Main');if(!wls[wcur])wcur=Object.keys(wls)[0];
 const NG={1:'1m',5:'5m',15:'15m',30:'30m',60:'1h',240:'4h',480:'8h',1440:'1d',10080:'7d',43200:'30d'};
 const NB={1:'1m',3:'3m',5:'5m',15:'15m',30:'30m',60:'1h',120:'2h',240:'4h',360:'6h',480:'8h',720:'12h',1440:'1d',4320:'3d',10080:'1w',43200:'1M'};
 const NF={1:'1min',5:'5min',15:'15min',30:'30min',45:'45min',60:'1h',120:'2h',240:'4h',1440:'1day',10080:'1week',43200:'1month'};
+const NFh={1:'1',5:'5',15:'15',30:'30',60:'60',1440:'D',10080:'W',43200:'M'};
 const FAV=['1m','5m','15m','30m','1h','4h','1d','1w','1M'];
 
 const cv=$('cv'),ctx=cv.getContext('2d'),AX=76,AY=26;
 let raw=[],D=[],fvgs=[],tfmin=60,base=60,tfms=36e5,atr=1,bw=8,off=6,W=0,H=0,pw=0,ph=0,lo=0,hi=1,m=null,raf=0,rb=0;
 let tool='cursor',drs=[],sel=null,draft=null,drag=null,down=null,ws=null,poll=null,loadId=0,dw=2,dcol='#2962ff';
-let Dfull=[],rp=null,hist=[],redoS=[],ptrs=new Map(),playT=0,cs=0;
+let Dfull=[],rp=null,hist=[],redoS=[],ptrs=new Map(),pinch=null,playT=0,cs=0;
 
 // Vertical panning and scaling variables (like TradingView)
 let vShift=0;
@@ -328,34 +342,35 @@ const coarse=matchMedia('(pointer:coarse)').matches,TH=coarse?16:7,HR=coarse?20:
 
 /* ---------- Preset Symbols Catalog for Instant Search ---------- */
 const PRESETS=[
- {sym:'BTC_USDT',bn:'BTCUSDT',fx:'',name:'Bitcoin',cat:'crypto'},
- {sym:'ETH_USDT',bn:'ETHUSDT',fx:'',name:'Ethereum',cat:'crypto'},
- {sym:'SOL_USDT',bn:'SOLUSDT',fx:'',name:'Solana',cat:'crypto'},
- {sym:'BNB_USDT',bn:'BNBUSDT',fx:'',name:'BNB Coin',cat:'crypto'},
- {sym:'XRP_USDT',bn:'XRPUSDT',fx:'',name:'Ripple',cat:'crypto'},
- {sym:'DOGE_USDT',bn:'DOGEUSDT',fx:'',name:'Dogecoin',cat:'crypto'},
- {sym:'ADA_USDT',bn:'ADAUSDT',fx:'',name:'Cardano',cat:'crypto'},
- {sym:'AVAX_USDT',bn:'AVAXUSDT',fx:'',name:'Avalanche',cat:'crypto'},
- {sym:'LINK_USDT',bn:'LINKUSDT',fx:'',name:'Chainlink',cat:'crypto'},
- {sym:'SUI_USDT',bn:'SUIUSDT',fx:'',name:'Sui Network',cat:'crypto'},
- {sym:'PEPE_USDT',bn:'PEPEUSDT',fx:'',name:'Pepe',cat:'crypto'},
- {sym:'SHIB_USDT',bn:'SHIBUSDT',fx:'',name:'Shiba Inu',cat:'crypto'},
- {sym:'NEAR_USDT',bn:'NEARUSDT',fx:'',name:'NEAR Protocol',cat:'crypto'},
- {sym:'LTC_USDT',bn:'LTCUSDT',fx:'',name:'Litecoin',cat:'crypto'},
- {sym:'DOT_USDT',bn:'DOTUSDT',fx:'',name:'Polkadot',cat:'crypto'},
- {sym:'',bn:'',fx:'EUR/USD',name:'Euro / US Dollar',cat:'fx'},
- {sym:'',bn:'',fx:'GBP/USD',name:'British Pound / US Dollar',cat:'fx'},
- {sym:'',bn:'',fx:'USD/JPY',name:'US Dollar / Japanese Yen',cat:'fx'},
- {sym:'',bn:'',fx:'USD/CHF',name:'US Dollar / Swiss Franc',cat:'fx'},
- {sym:'',bn:'',fx:'AUD/USD',name:'Australian Dollar / USD',cat:'fx'},
- {sym:'',bn:'',fx:'USD/CAD',name:'US Dollar / Canadian Dollar',cat:'fx'},
- {sym:'',bn:'',fx:'XAU/USD',name:'Gold Spot / U.S. Dollar',cat:'fx'},
- {sym:'',bn:'',fx:'XAG/USD',name:'Silver Spot / U.S. Dollar',cat:'fx'},
- {sym:'',bn:'',fx:'N225',name:'Nikkei 225 (JP225)',cat:'fx'},
- {sym:'',bn:'',fx:'SPX',name:'S&P 500 Index (SPX500)',cat:'fx'},
- {sym:'',bn:'',fx:'NDX',name:'Nasdaq 100 (NAS100)',cat:'fx'},
- {sym:'',bn:'',fx:'IXIC',name:'Nasdaq Composite',cat:'fx'},
- {sym:'',bn:'',fx:'DJI',name:'Dow Jones Industrial (US30)',cat:'fx'}
+ {sym:'BTC_USDT',bn:'BTCUSDT',fx:'',fh:'BINANCE:BTCUSDT',name:'Bitcoin',cat:'crypto',src:'gate'},
+ {sym:'ETH_USDT',bn:'ETHUSDT',fx:'',fh:'BINANCE:ETHUSDT',name:'Ethereum',cat:'crypto',src:'gate'},
+ {sym:'SOL_USDT',bn:'SOLUSDT',fx:'',fh:'BINANCE:SOLUSDT',name:'Solana',cat:'crypto',src:'gate'},
+ {sym:'BNB_USDT',bn:'BNBUSDT',fx:'',fh:'BINANCE:BNBUSDT',name:'BNB Coin',cat:'crypto',src:'gate'},
+ {sym:'XRP_USDT',bn:'XRPUSDT',fx:'',fh:'BINANCE:XRPUSDT',name:'Ripple',cat:'crypto',src:'gate'},
+ {sym:'DOGE_USDT',bn:'DOGEUSDT',fx:'',fh:'',name:'Dogecoin',cat:'crypto',src:'gate'},
+ {sym:'ADA_USDT',bn:'ADAUSDT',fx:'',fh:'',name:'Cardano',cat:'crypto',src:'gate'},
+ {sym:'AVAX_USDT',bn:'AVAXUSDT',fx:'',fh:'',name:'Avalanche',cat:'crypto',src:'gate'},
+ {sym:'LINK_USDT',bn:'LINKUSDT',fx:'',fh:'',name:'Chainlink',cat:'crypto',src:'gate'},
+ {sym:'SUI_USDT',bn:'SUIUSDT',fx:'',fh:'',name:'Sui Network',cat:'crypto',src:'gate'},
+ {sym:'PEPE_USDT',bn:'PEPEUSDT',fx:'',fh:'',name:'Pepe',cat:'crypto',src:'gate'},
+ {sym:'SHIB_USDT',bn:'SHIBUSDT',fx:'',fh:'',name:'Shiba Inu',cat:'crypto',src:'gate'},
+ {sym:'NEAR_USDT',bn:'NEARUSDT',fx:'',fh:'',name:'NEAR Protocol',cat:'crypto',src:'gate'},
+ {sym:'LTC_USDT',bn:'LTCUSDT',fx:'',fh:'',name:'Litecoin',cat:'crypto',src:'gate'},
+ {sym:'DOT_USDT',bn:'DOTUSDT',fx:'',fh:'',name:'Polkadot',cat:'crypto',src:'gate'},
+ {sym:'',bn:'',fx:'EUR/USD',fh:'OANDA:EUR_USD',name:'Euro / US Dollar',cat:'fx',src:'fx'},
+ {sym:'',bn:'',fx:'GBP/USD',fh:'OANDA:GBP_USD',name:'British Pound / US Dollar',cat:'fx',src:'fx'},
+ {sym:'',bn:'',fx:'USD/JPY',fh:'OANDA:USD_JPY',name:'US Dollar / Japanese Yen',cat:'fx',src:'fx'},
+ {sym:'',bn:'',fx:'USD/CHF',fh:'OANDA:USD_CHF',name:'US Dollar / Swiss Franc',cat:'fx',src:'fx'},
+ {sym:'',bn:'',fx:'AUD/USD',fh:'OANDA:AUD_USD',name:'Australian Dollar / USD',cat:'fx',src:'fx'},
+ {sym:'',bn:'',fx:'USD/CAD',fh:'OANDA:USD_CAD',name:'US Dollar / Canadian Dollar',cat:'fx',src:'fx'},
+ {sym:'',bn:'',fx:'XAU/USD',fh:'OANDA:XAU_USD',name:'Gold Spot / U.S. Dollar',cat:'fx',src:'fh'},
+ {sym:'',bn:'',fx:'XAG/USD',fh:'OANDA:XAG_USD',name:'Silver Spot / U.S. Dollar',cat:'fx',src:'fh'},
+ {sym:'',bn:'',fx:'N225',fh:'OANDA:JP225_USD',name:'Nikkei 225 / JP225',cat:'fx',src:'fh'},
+ {sym:'',bn:'',fx:'SPX',fh:'OANDA:SPX500_USD',name:'S&P 500 Index / US500',cat:'fx',src:'fh'},
+ {sym:'',bn:'',fx:'NDX',fh:'OANDA:NAS100_USD',name:'Nasdaq 100 / NAS100',cat:'fx',src:'fh'},
+ {sym:'',bn:'',fx:'DJI',fh:'OANDA:US30_USD',name:'Dow Jones Industrial / US30',cat:'fx',src:'fh'},
+ {sym:'',bn:'',fx:'DAX',fh:'OANDA:GER30_EUR',name:'DAX 40 (Germany)',cat:'fx',src:'fh'},
+ {sym:'',bn:'',fx:'IXIC',fh:'',name:'Nasdaq Composite',cat:'fx',src:'fx'}
 ];
 
 // Dynamic Twelve Data Symbol Catalog (Cached from API)
@@ -443,8 +458,19 @@ function tfParse(s){
 }
 
 const normSym=(src,s)=>{
- s=s.toUpperCase().replace(/[^A-Z0-9/._-]/g,'');
+ s=s.toUpperCase().replace(/[^A-Z0-9/._:-]/g,'');
  if(src==='fx'&&!s.includes('/')&&s.length===6)s=s.slice(0,3)+'/'+s.slice(3);
+ if(src==='fh'){
+  if(s.includes('/')||(!s.includes(':')&&['EUR','GBP','JPY','AUD','CAD','CHF','NZD','XAU','XAG'].some(c=>s.includes(c))&&s.length<=7)){
+   s='OANDA:'+s.replace('/', '_');
+  } else if(!s.includes(':')&&['SPX','NAS','JP225','US30','GER30','UK100','N225','NDX','DJI'].some(c=>s.includes(c))){
+   if(s==='SPX'||s==='SPX500')s='OANDA:SPX500_USD';
+   else if(s==='NAS'||s==='NAS100'||s==='NDX')s='OANDA:NAS100_USD';
+   else if(s==='JP225'||s==='N225')s='OANDA:JP225_USD';
+   else if(s==='US30'||s==='DJI')s='OANDA:US30_USD';
+   else s='OANDA:'+s.replace(/[/_-]/g,'_');
+  }
+ }
  if(src==='gate'){
   s=s.replace('/', '_');
   if(!s.includes('_')){
@@ -498,7 +524,7 @@ function playChime(){
 function plan(){
  const p=tfParse(S.tf)||{min:60,label:'1h'};
  S.tf=p.label;tfmin=p.min;tfms=tfmin*6e4;
- const nat=S.src==='bn'?NB:S.src==='fx'?NF:NG;
+ const nat=S.src==='bn'?NB:S.src==='fx'?NF:S.src==='fh'?NFh:NG;
  if(nat[tfmin])base=tfmin;
  else base=Object.keys(nat).map(Number).sort((a,b)=>b-a).find(b=>b<tfmin&&tfmin%b===0)||1;
  return nat[base];
@@ -560,6 +586,54 @@ async function fetchTd(sym,iv,size,endT){
   throw Error(j.message);
  }
  return j.values.map(v=>{let s=v.datetime;s=s.length<11?s+'T00:00:00Z':s.replace(' ','T')+'Z';return{t:Date.parse(s),o:+v.open,h:+v.high,l:+v.low,c:+v.close}});
+}
+
+async function fetchFh(sym,iv,count,endT){
+ const k=cfg.fhKey;
+ if(!k)throw Error('Finnhub API key required. Add it in ⚙ Settings');
+ const to=endT?Math.floor(endT/1000):Math.floor(Date.now()/1000);
+ let spanSec=86400*30;
+ if(iv==='1')spanSec=86400*3;
+ else if(iv==='5')spanSec=86400*7;
+ else if(iv==='15')spanSec=86400*14;
+ else if(iv==='30')spanSec=86400*30;
+ else if(iv==='60')spanSec=86400*60;
+ else if(iv==='D')spanSec=86400*365;
+ else if(iv==='W')spanSec=86400*365*3;
+ else if(iv==='M')spanSec=86400*365*10;
+ const from=to-spanSec;
+
+ let s=sym.toUpperCase().trim();
+ let endpoint='forex';
+ if(s.startsWith('OANDA:')||s.includes('_')||s.includes('/')){
+  endpoint='forex';
+  if(!s.startsWith('OANDA:'))s='OANDA:'+s.replace('/','_');
+ }else{
+  endpoint='stock';
+ }
+
+ let url=`https://finnhub.io/api/v1/${endpoint}/candle?symbol=${encodeURIComponent(s)}&resolution=${iv}&from=${from}&to=${to}&token=${encodeURIComponent(k)}`;
+ let r=await fetch(url);
+ let j=await r.json();
+
+ if(j.s==='no_data'&&endpoint==='forex'){
+  url=`https://finnhub.io/api/v1/stock/candle?symbol=${encodeURIComponent(sym)}&resolution=${iv}&from=${from}&to=${to}&token=${encodeURIComponent(k)}`;
+  r=await fetch(url);
+  j=await r.json();
+ }
+
+ if(j.s!=='ok'||!Array.isArray(j.t)||!j.t.length){
+  if(j.error)throw Error(j.error);
+  throw Error('No data from Finnhub for '+sym);
+ }
+
+ return j.t.map((ts,i)=>({
+  t:ts*1000,
+  o:+j.o[i],
+  h:+j.h[i],
+  l:+j.l[i],
+  c:+j.c[i]
+ }));
 }
 
 function checkAlerts(b){
@@ -678,12 +752,14 @@ async function load(){
  const iv=plan();
  try{
   if(S.src==='bn'){
-   raw=await fetchBn(S.sym,iv,base===tfmin?2:4);
-  }else if(S.src==='gate'){
-   raw=await fetchGate(S.sym,iv,base===tfmin?2:4);
-  }else{
-   raw=await fetchTd(S.sym,iv,5000);
-  }
+    raw=await fetchBn(S.sym,iv,base===tfmin?2:4);
+   }else if(S.src==='gate'){
+    raw=await fetchGate(S.sym,iv,base===tfmin?2:4);
+   }else if(S.src==='fh'){
+    raw=await fetchFh(S.sym,iv,500);
+   }else{
+    raw=await fetchTd(S.sym,iv,5000);
+   }
   if(my!==loadId)return;
   if(!raw.length)throw Error('No data for '+S.sym);
   vShift=0;vZoom=1;
@@ -732,9 +808,11 @@ function live(my,iv){
    ws.onclose=()=>{clearInterval(ping);if(my===loadId)setTimeout(()=>my===loadId&&open(),2500)};
    ws.onerror=()=>{try{ws.close()}catch{}};
   };open();
- }else{
-  poll=setInterval(async()=>{try{(await fetchTd(S.sym,iv,2)).forEach(upsert)}catch{}},20000);
- }
+ }else if(S.src==='fh'){
+   poll=setInterval(async()=>{try{(await fetchFh(S.sym,iv,2)).forEach(upsert)}catch{}},15000);
+  }else{
+   poll=setInterval(async()=>{try{(await fetchTd(S.sym,iv,2)).forEach(upsert)}catch{}},20000);
+  }
 }
 
 function setSym(src,sym,tf){
@@ -791,11 +869,16 @@ function handles(d){
  const P=d.pts.map(q=>[X(q.t),Y(q.p)]);
  if(d.type==='rect'&&P.length>=2){
   const a=P[0],b=P[1];
-  // 3 pull points: Corner 1 (top-left), Corner 2 (bottom-right), Pull Point 3 (top-right)
+  const x1=a[0],y1=a[1],x2=b[0],y2=b[1];
+  const my=(y1+y2)/2;
+  // 6 modification points: 4 corners + 2 horizontal side midpoints
   return [
-   {x:a[0],y:a[1],k:0},
-   {x:b[0],y:b[1],k:1},
-   {x:b[0],y:a[1],k:2}
+   {x:x1,y:y1,k:'tl'}, // Top-Left
+   {x:x2,y:y1,k:'tr'}, // Top-Right
+   {x:x2,y:y2,k:'br'}, // Bottom-Right
+   {x:x1,y:y2,k:'bl'}, // Bottom-Left
+   {x:x1,y:my,k:'ml'}, // Mid-Left
+   {x:x2,y:my,k:'mr'}  // Mid-Right
   ];
  }
  const H=P.map((p,i)=>({x:p[0],y:p[1],k:i}));
@@ -1152,6 +1235,11 @@ function updateAlertsUI(){
 cv.onpointerdown=e=>{
  cv.setPointerCapture(e.pointerId);
  const[x,y]=pos(e);m={x,y};ptrs.set(e.pointerId,[x,y]);
+ if(ptrs.size===2){
+  const[a,b]=[...ptrs.values()];
+  pinch={d:Math.hypot(a[0]-b[0],a[1]-b[1])||1,bw:bw,idx:idxAt((a[0]+b[0])/2)};
+  drag=null;draft=null;return;
+ }
  if(!D.length)return;
  down={x,y};
 
@@ -1227,6 +1315,12 @@ cv.onpointerdown=e=>{
 cv.onpointermove=e=>{
  const[x,y]=pos(e);m={x,y};
  if(ptrs.has(e.pointerId))ptrs.set(e.pointerId,[x,y]);
+ if(pinch&&ptrs.size===2){
+  const[a,b]=[...ptrs.values()],d=Math.hypot(a[0]-b[0],a[1]-b[1])||1,mx=(a[0]+b[0])/2;
+  bw=Math.max(1.5,Math.min(60,pinch.bw*d/pinch.d));
+  off=pinch.idx-(mx-pw)/bw-(D.length-1);
+  sched();return;
+ }
 
  if(draft){
   draft.pts[draft.pts.length-1]=pt(x,y);
@@ -1238,11 +1332,19 @@ cv.onpointermove=e=>{
   const sn=magnetOn?getSnapped(x,y):{p:pAt(y),t:tOf(idxAt(x))};
   const k=drag.k,t=sn.t,p=sn.p;
   if(k==='s')sel.s=p;
-  else if(k==='tg')sel.tg=p;
-  else if(sel.s!=null&&k===1){sel.pts[1]={t,p:sel.pts[0].p}}
-  else if(sel.s!=null&&k===0){sel.pts[0]={t,p};sel.pts[1].p=p}
-  else if(sel.type==='rect'&&k===2){sel.pts[1].t=t;sel.pts[0].p=p}
-  else sel.pts[k]={t,p};
+   else if(k==='tg')sel.tg=p;
+   else if(sel.s!=null&&k===1){sel.pts[1]={t,p:sel.pts[0].p}}
+   else if(sel.s!=null&&k===0){sel.pts[0]={t,p};sel.pts[1].p=p}
+   else if(k==='tl'){sel.pts[0]={t,p}}
+   else if(k==='tr'){sel.pts[1].t=t;sel.pts[0].p=p}
+   else if(k==='br'){sel.pts[1]={t,p}}
+   else if(k==='bl'){sel.pts[0].t=t;sel.pts[1].p=p}
+   else if(k==='ml'){sel.pts[0].t=t}
+   else if(k==='mr'){sel.pts[1].t=t}
+   else if(sel.type==='rect'&&k===2){sel.pts[1].t=t;sel.pts[0].p=p}
+   else if(sel.type==='rect'&&k===0){sel.pts[0]={t,p}}
+   else if(sel.type==='rect'&&k===1){sel.pts[1]={t,p}}
+   else sel.pts[k]={t,p};
   updateDrMenu();
  }
  // Dragging the whole drawing
@@ -1274,6 +1376,7 @@ cv.onpointermove=e=>{
 
 cv.onpointerup=e=>{
  ptrs.delete(e.pointerId);
+ if(ptrs.size<2)pinch=null;
  if(draft&&draft.sx!=null){
   const[x,y]=pos(e);
   if(Math.hypot(x-draft.sx,y-draft.sy)>6){
@@ -1299,7 +1402,13 @@ cv.onmouseleave=()=>{m=null;$('ohlc').innerHTML='';sched()};
 // Horizontal wheel or Shift+Wheel scales horizontal time (bw)
 cv.addEventListener('wheel',e=>{
  e.preventDefault();if(!D.length)return;
- if(e.ctrlKey)return; // ignore trackpad pinch gestures
+ if(e.ctrlKey){
+  // Trackpad pinch gesture: zoom candle bar width (bw) centered at cursor
+  const[x]=pos(e),idx=idxAt(x);
+  bw=Math.max(1.5,Math.min(60,bw*Math.exp(-e.deltaY*0.005)));
+  off=idx-(x-pw)/bw-(D.length-1);
+  sched();return;
+ }
  if(e.shiftKey||Math.abs(e.deltaX)>Math.abs(e.deltaY)){
   const dX=e.shiftKey?e.deltaY:e.deltaX;
   const[x]=pos(e),idx=idxAt(x);
@@ -1409,22 +1518,40 @@ $('fvgtog').onclick=()=>{
 
 /* ---------- Symbol Autocomplete & Search Modal (Fixed Position) ---------- */
 let curCat='all';
+let curBrk='all';
 
 function renderSearchResults(query=''){
  const q=query.trim().toLowerCase();
  const seen=new Set();
  const combined=[];
  for(const p of PRESETS){
-  const k=(p.sym||p.bn||p.fx).toUpperCase();
-  seen.add(k);
-  combined.push(p);
+  if(curBrk==='gate'&&!p.sym)continue;
+  if(curBrk==='bn'&&!p.bn)continue;
+  if(curBrk==='fx'&&!p.fx)continue;
+  if(curBrk==='fh'&&!p.fh)continue;
+
+  let targetSrc = p.src || 'gate';
+  if(curBrk==='gate')targetSrc='gate';
+  else if(curBrk==='bn')targetSrc='bn';
+  else if(curBrk==='fx')targetSrc='fx';
+  else if(curBrk==='fh')targetSrc='fh';
+  else if(p.fh && (p.cat==='fx'||p.name.includes('Index')||p.name.includes('225')||p.name.includes('500')||p.name.includes('100')||p.name.includes('30')))targetSrc='fh';
+
+  let displaySym = (targetSrc==='fh'&&p.fh) ? p.fh : (targetSrc==='bn'&&p.bn) ? p.bn : (targetSrc==='fx'&&p.fx) ? p.fx : (p.sym||p.fx||p.fh||p.bn);
+  const k = (targetSrc + ':' + displaySym).toUpperCase();
+  if(!seen.has(k)){
+   seen.add(k);
+   combined.push({sym:displaySym,src:targetSrc,name:p.name,cat:p.cat});
+  }
  }
- if(Array.isArray(tdSymbols)){
-  for(const s of tdSymbols){
-   const k=(s.fx||'').toUpperCase();
-   if(k&&!seen.has(k)){
-    seen.add(k);
-    combined.push(s);
+ if(curBrk==='all'||curBrk==='fx'){
+  if(Array.isArray(tdSymbols)){
+   for(const s of tdSymbols){
+    const k=('fx:'+s.fx).toUpperCase();
+    if(!seen.has(k)){
+     seen.add(k);
+     combined.push({sym:s.fx,src:'fx',name:s.name,cat:'fx'});
+    }
    }
   }
  }
@@ -1432,27 +1559,26 @@ function renderSearchResults(query=''){
   if(curCat==='crypto'&&p.cat!=='crypto')return false;
   if(curCat==='fx'&&p.cat!=='fx')return false;
   if(!q)return true;
-  const symStr=(p.sym||p.bn||p.fx||'').toLowerCase();
+  const symStr=(p.sym||'').toLowerCase();
   return symStr.includes(q)||(p.name&&p.name.toLowerCase().includes(q));
  }).slice(0,60);
  
  if(!filtered.length){
-  $('search-results').innerHTML=`<div style="padding:16px;text-align:center;color:#8a919e">No preset found. Press Enter to load <b>"${query.toUpperCase()}"</b> directly.</div>`;
+  const fallbackSrc = curBrk!=='all'?curBrk:(curCat==='fx'?'fx':S.src);
+  $('search-results').innerHTML=`<div style="padding:16px;text-align:center;color:#8a919e">No preset found. Press Enter to load <b>"${query.toUpperCase()}"</b> directly via ${fallbackSrc==='gate'?'Gate.io':fallbackSrc==='bn'?'Binance':fallbackSrc==='fh'?'Finnhub':'Twelve Data'}.</div>`;
   return;
  }
  
  $('search-results').innerHTML=filtered.map(p=>{
-  const isFx=p.cat==='fx';
-  const displaySym=isFx?p.fx:p.sym;
-  const src=isFx?'fx':(S.src==='bn'?'bn':'gate');
+  const brkLabel = p.src==='gate'?'Gate.io':p.src==='bn'?'Binance':p.src==='fh'?'Finnhub':'Twelve Data';
   return `
-  <div class="s-item" data-sym="${displaySym}" data-src="${src}">
-   ${symBadge(displaySym,src)}
+  <div class="s-item" data-sym="${p.sym}" data-src="${p.src}">
+   ${symBadge(p.sym,p.src)}
    <div style="display:flex;flex-direction:column;flex:1;overflow:hidden">
-    <span class="s-sym">${displaySym}</span>
-    <span class="s-desc" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.name||displaySym}</span>
+    <span class="s-sym">${p.sym}</span>
+    <span class="s-desc" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.name||p.sym}</span>
    </div>
-   <span class="s-tag">${isFx?'Forex/Index':(src==='bn'?'Binance':'Gate.io')}</span>
+   <span class="s-tag">${brkLabel}</span>
   </div>
   `;
  }).join('');
@@ -1477,7 +1603,8 @@ $('search-input').onkeydown=e=>{
    if(first){
     first.click();
    }else{
-    setSym(S.src,val);
+    const targetSrc=curBrk!=='all'?curBrk:(curCat==='fx'?'fx':S.src);
+    setSym(targetSrc,val);
     $('search-modal').hidden=true;
    }
   }
@@ -1494,6 +1621,18 @@ $('search-tabs').onclick=e=>{
  }
 };
 
+if($('search-brokers')){
+ $('search-brokers').onclick=e=>{
+  const b=e.target.closest('.sbrk');
+  if(b){
+   document.querySelectorAll('.sbrk').forEach(s=>s.classList.remove('on'));
+   b.classList.add('on');
+   curBrk=b.dataset.brk;
+   renderSearchResults($('search-input').value);
+  }
+ };
+}
+
 $('search-results').onclick=e=>{
  const item=e.target.closest('.s-item');
  if(item){
@@ -1506,7 +1645,7 @@ $('search-results').onclick=e=>{
 
 $('src').onchange=()=>{
  const v=$('src').value;
- setSym(v,v==='gate'?'BTC_USDT':v==='bn'?'BTCUSDT':'EUR/USD');
+ setSym(v,v==='gate'?'BTC_USDT':v==='bn'?'BTCUSDT':v==='fh'?'OANDA:SPX500_USD':'EUR/USD');
 };
 
 /* ---------- Alerts Modal & Management ---------- */
@@ -1550,7 +1689,7 @@ const SPEC=[
  ['bg','color','Background Color'],['grid','color','Grid Line Color'],
  ['fvgOn','check','Show Fair Value Gaps (FVG)'],['fvgUp','color','Bullish FVG Color'],['fvgDn','color','Bearish FVG Color'],
  ['fvgOp','range','FVG Box Opacity'],['fvgMin','number','Min FVG Size (%)'],['fvgMax','number','Max FVG Boxes'],['fvgMit','check','Show Mitigated FVGs'],
- ['gapFree','check','Gap-Free Candles'],['key','text','Twelve Data Key (Forex/Stocks)']
+ ['gapFree','check','Gap-Free Candles'],['fhKey','text','Finnhub API Key (Forex/Indices/CFD)'],['key','text','Twelve Data Key (Forex/Stocks)']
 ];
 
 $('setbody').innerHTML='<b style="font-size:14px;color:#fff;display:block;margin-bottom:10px">Chart Settings</b>'+SPEC.map(s=>`
@@ -1567,7 +1706,7 @@ document.querySelectorAll('#setbody [data-k]').forEach(i=>{
   cfg[k]=i.type==='checkbox'?i.checked:(i.type==='number'||i.type==='range')?+i.value:i.value;
   SV('cfg',cfg);
   if(k==='fvgOn')$('fvgtog').classList.toggle('on',cfg.fvgOn);
-  if(k==='key'){if(S.src==='fx')load()}else{rebuild();sched()}
+  if(k==='key'||k==='fhKey'){if(S.src==='fx'||S.src==='fh')load()}else{rebuild();sched()}
  };
 });
 
@@ -1586,7 +1725,7 @@ function wlRender(){
    ${symBadge(x.sym,x.src)}
    <div class="sym-info">
     <div class="sym-name">${x.sym}</div>
-    <div class="sym-src">${x.src==='gate'?'Gate.io':x.src==='bn'?'Binance':'Forex'}</div>
+    <div class="sym-src">${x.src==='gate'?'Gate.io':x.src==='bn'?'Binance':x.src==='fh'?'Finnhub':'Twelve Data'}</div>
    </div>
    <div class="sym-price" id="wp${i}">
     <span class="p-val">--</span>
@@ -1651,6 +1790,19 @@ async function wlPrices(){
    }
   }catch{}
  }
+ // Finnhub symbols (Forex, Indices, Stocks)
+ const fhIdx=L.map((x,i)=>x.src==='fh'?i:-1).filter(i=>i>=0);
+ for(const i of fhIdx){
+  try{
+   const r=await fetch(`https://finnhub.io/api/v1/quote?symbol=${encodeURIComponent(L[i].sym)}&token=${cfg.fhKey||''}`);
+   const q=await r.json();
+   if(q&&q.c&&$('wp'+i)){
+    const last=+q.c;
+    const c=+q.dp||0;
+    $('wp'+i).innerHTML=`<span class="p-val">${fmt(last)}</span><span class="p-chg ${c>=0?'up':'dn'}">${c>=0?'+':''}${c.toFixed(2)}%</span>`;
+   }
+  }catch{}
+ }
 }
 
 $('wi').onclick=e=>{
@@ -1706,8 +1858,9 @@ async function loadMore(){
  try{
   const e=raw[0].t-1;let a=[];
   if(S.src==='bn')a=await fetchBn(S.sym,NB[base],4,e);
-  else if(S.src==='gate')a=await fetchGate(S.sym,NG[base]||'1h',4,e);
-  else a=await fetchTd(S.sym,NF[base],5000,e);
+   else if(S.src==='gate')a=await fetchGate(S.sym,NG[base]||'1h',4,e);
+   else if(S.src==='fh')a=await fetchFh(S.sym,NFh[base]||'60',500,e);
+   else a=await fetchTd(S.sym,NF[base],5000,e);
   const have=new Set(raw.map(b=>b.t)),add=a.filter(b=>!have.has(b.t));
   if(!add.length){status('No older data available');setTimeout(()=>status(''),2500);return}
   raw=add.concat(raw);rebuild();status('');sched();
@@ -1719,7 +1872,7 @@ $('rf').onclick=()=>{setPlay(0);step(1)};
 $('rpl').onclick=togglePlay;
 $('rx').onclick=exitRp;
 
-cv.onpointercancel=e=>{ptrs.delete(e.pointerId);drag=null};
+cv.onpointercancel=e=>{ptrs.delete(e.pointerId);pinch=null;drag=null};
 if('serviceWorker' in navigator&&/^https?:/.test(location.protocol))navigator.serviceWorker.register('sw.js').catch(()=>{});
 
 /* ---------- Bootstrap ---------- */
