@@ -232,27 +232,7 @@ button.on{background:#2962ff;border-color:#2962ff;color:#fff}
 </head><body>
 <div id="app">
 <div id="top">
- <div id="brand" title="MyCharts">
-  <svg width="22" height="22" viewBox="0 0 48 48" fill="none">
-   <defs>
-    <linearGradient id="mcg" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse">
-     <stop offset="0%" stop-color="#2962ff"/>
-     <stop offset="50%" stop-color="#00b0ff"/>
-     <stop offset="100%" stop-color="#00e676"/>
-    </linearGradient>
-   </defs>
-   <rect x="2" y="2" width="44" height="44" rx="11" fill="#151a23" stroke="#2a3342" stroke-width="2"/>
-   <line x1="13" y1="14" x2="13" y2="36" stroke="#2962ff" stroke-width="2" stroke-linecap="round"/>
-   <rect x="10.5" y="19" width="5" height="13" rx="1.5" fill="#2962ff"/>
-   <line x1="24" y1="18" x2="24" y2="38" stroke="#00b0ff" stroke-width="2" stroke-linecap="round"/>
-   <rect x="21.5" y="22" width="5" height="12" rx="1.5" fill="#00b0ff"/>
-   <line x1="35" y1="8" x2="35" y2="32" stroke="#00e676" stroke-width="2" stroke-linecap="round"/>
-   <rect x="32.5" y="11" width="5" height="15" rx="1.5" fill="#00e676"/>
-   <path d="M 13 28 L 24 22 L 35 12" stroke="url(#mcg)" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
-   <circle cx="35" cy="12" r="3" fill="#00e676"/>
-  </svg>
-  <span><span style="color:#fff">My</span><span style="color:#2962ff">Charts</span></span>
- </div>
+ <div id="brand" title="MyCharts"><span><span style="color:#fff">My</span><span style="color:#2962ff">Charts</span></span></div>
  
  <select id="src">
   <option value="tv">TradingView</option>
@@ -273,7 +253,8 @@ button.on{background:#2962ff;border-color:#2962ff;color:#fff}
  <button id="alert-btn" title="Price & Drawing Alerts">🔔 <span id="alert-cnt">0</span></button>
  <button id="rpbtn" title="Bar replay">⏪ Replay</button>
  <button id="more" title="Load older history">⟲</button>
- <button id="gear" title="Settings">⚙</button>
+ <button id="sync-btn" title="Cloud Sync & Account">☁️ Sync</button>
+  <button id="gear" title="Settings">⚙</button>
  <button id="wtog" title="Toggle Watchlist">📑 Watchlist</button>
  <span id="st"></span>
 </div>
@@ -286,10 +267,21 @@ button.on{background:#2962ff;border-color:#2962ff;color:#fff}
  <canvas id="cv"></canvas>
  <div id="ohlc"></div>
  <div id="dr-menu" hidden>
-  <button id="dr-alert" title="Set alert on this drawing">🔔 Alert</button>
-  <button id="dr-horiz" title="Make end price match start price (Horizontal)">─ Horizontal</button>
-  <button id="dr-del" title="Delete drawing">🗑 Delete</button>
- </div>
+   <input type="color" id="dr-col" title="Line / Fill Color" style="width:24px;height:24px;padding:0;border:none;border-radius:4px;cursor:pointer">
+   <select id="dr-w" title="Line Thickness" style="padding:2px 4px;font-size:11px">
+    <option value="1">1px</option>
+    <option value="2">2px</option>
+    <option value="3">3px</option>
+    <option value="4">4px</option>
+    <option value="5">5px</option>
+    <option value="6">6px</option>
+   </select>
+   <button id="dr-clone" title="Clone Drawing">📋 Clone</button>
+   <button id="dr-label-btn" title="Add / Position Label">🏷 Label</button>
+   <button id="dr-horiz" title="Make end price match start price (Horizontal)">─ Horizontal</button>
+   <button id="dr-alert" title="Set alert on this drawing">🔔 Alert</button>
+   <button id="dr-del" title="Delete drawing">🗑 Delete</button>
+  </div>
  <div id="rp" hidden>
   <button id="rb" title="Step back">◀</button>
   <button id="rpl" title="Play / pause">▶</button>
@@ -330,8 +322,8 @@ button.on{background:#2962ff;border-color:#2962ff;color:#fff}
 
 <!-- Mobile Sliding Strip & Bottom Navigation Bar (Image 2) -->
 <div id="mobile-slider">
- <button id="m-quick-edit" title="Toggle Drawing Tools">✏️</button>
  <div id="m-slider-inner"></div>
+ <button id="m-slider-tf" title="Select Timeframe" style="padding:4px 8px;font-size:11px;font-weight:600;background:#1e222d;border:1px solid #2a2e39;color:#c9ced8;border-radius:6px;flex-shrink:0;cursor:pointer">1h ▾</button>
 </div>
 
 <div id="mobile-nav">
@@ -377,6 +369,85 @@ button.on{background:#2962ff;border-color:#2962ff;color:#fff}
  </div>
 </div>
 
+</div>
+
+
+<!-- Drawing Label Customizer Modal -->
+<div id="label-modal" hidden>
+ <div id="label-box" style="background:#131722;border:1px solid #2a2e39;border-radius:10px;padding:16px;width:min(360px,94vw);box-shadow:0 12px 36px rgba(0,0,0,.8);display:flex;flex-direction:column;gap:10px">
+  <div style="display:flex;justify-content:space-between;align-items:center">
+   <b style="color:#fff;font-size:13px">Customize Drawing Label</b>
+   <button id="lbl-close" style="background:transparent;border:none;font-size:16px;cursor:pointer;color:#8a919e">✕</button>
+  </div>
+  <input id="lbl-text" placeholder="Enter label (e.g. Resistance, Support, Entry)..." style="width:100%;padding:6px 10px;font-size:12px">
+  <div>
+   <span style="font-size:11px;color:#8a919e">Horizontal Position:</span>
+   <div id="lbl-h-btns" style="display:flex;gap:4px;margin-top:4px">
+    <button class="lbl-btn on" data-h="left" style="flex:1;font-size:11px;padding:4px">Left</button>
+    <button class="lbl-btn" data-h="center" style="flex:1;font-size:11px;padding:4px">Center</button>
+    <button class="lbl-btn" data-h="right" style="flex:1;font-size:11px;padding:4px">Right</button>
+   </div>
+  </div>
+  <div>
+   <span style="font-size:11px;color:#8a919e">Vertical Position:</span>
+   <div id="lbl-v-btns" style="display:flex;gap:4px;margin-top:4px">
+    <button class="lbl-btn on" data-v="top" style="flex:1;font-size:11px;padding:4px">Top</button>
+    <button class="lbl-btn" data-v="middle" style="flex:1;font-size:11px;padding:4px">Middle</button>
+    <button class="lbl-btn" data-v="bottom" style="flex:1;font-size:11px;padding:4px">Bottom</button>
+   </div>
+  </div>
+  <div style="display:flex;gap:6px;margin-top:6px">
+   <button id="lbl-save" style="flex:1;background:#2962ff;border-color:#2962ff;color:#fff;font-weight:600;padding:6px">Apply Label</button>
+   <button id="lbl-clear" style="background:#2a2e39;color:#ef5350;padding:6px">Remove</button>
+  </div>
+ </div>
+</div>
+
+<!-- Cloud Storage & Cross-Device Account Sync Modal -->
+<div id="sync-modal" hidden>
+ <div id="sync-box" style="background:#131722;border:1px solid #2a2e39;border-radius:12px;padding:18px;width:min(460px,94vw);max-height:85vh;overflow-y:auto;box-shadow:0 16px 48px rgba(0,0,0,.8);display:flex;flex-direction:column;gap:12px">
+  <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #2a2e39;padding-bottom:10px">
+   <div>
+    <b style="color:#fff;font-size:15px">☁️ Cloud Sync & Account Storage</b>
+    <div style="font-size:11px;color:#8a919e">Sync drawings and settings between your laptop and phone</div>
+   </div>
+   <button id="sync-close" style="background:transparent;border:none;font-size:18px;cursor:pointer;color:#8a919e">✕</button>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:4px">
+   <label style="font-size:11px;color:#8a919e">Account Name / Profile</label>
+   <input id="sync-user" placeholder="e.g. Bob (Default)" style="padding:6px 10px;font-size:12px">
+  </div>
+
+  <div style="border:1px solid #2a2e39;border-radius:8px;padding:10px;background:#181e28;display:flex;flex-direction:column;gap:8px">
+   <b style="color:#fff;font-size:12px">Option 1: Instant One-Click Transfer (Zero Setup)</b>
+   <div style="font-size:11px;color:#8a919e">Generate a sync code on your laptop, paste it on your phone to transfer everything in 1 second.</div>
+   <div style="display:flex;gap:6px">
+    <button id="sync-copy-code" style="flex:1;background:#2962ff;border-color:#2962ff;color:#fff;font-size:11px;font-weight:600;padding:6px">📋 Copy Sync Code</button>
+    <button id="sync-export-file" style="flex:1;background:#1e222d;font-size:11px;padding:6px">💾 Export File</button>
+   </div>
+   <textarea id="sync-code-input" placeholder="Paste sync code here on your other device..." rows="2" style="width:100%;font-size:11px;background:#11151c;border:1px solid #2a2e39;color:#c9ced8;border-radius:4px;padding:6px"></textarea>
+   <div style="display:flex;gap:6px">
+    <button id="sync-paste-code" style="flex:1;background:#26a69a;border-color:#26a69a;color:#fff;font-size:11px;font-weight:600;padding:6px">📥 Load From Code</button>
+    <input type="file" id="sync-file-input" accept=".json" style="display:none">
+    <button id="sync-import-file" style="flex:1;background:#1e222d;font-size:11px;padding:6px">📂 Import File</button>
+   </div>
+  </div>
+
+  <div style="border:1px solid #2a2e39;border-radius:8px;padding:10px;background:#181e28;display:flex;flex-direction:column;gap:8px">
+   <b style="color:#fff;font-size:12px">Option 2: Automated Cloud Sync (GitHub Gist)</b>
+   <div style="font-size:11px;color:#8a919e">Saves all drawings automatically to your private GitHub Gist for permanent real-time cross-device sync.</div>
+   <input id="sync-token" placeholder="GitHub Personal Access Token (classic with 'gist' scope)" type="password" style="font-size:11px;padding:6px 10px">
+   <input id="sync-gist-id" placeholder="Gist ID (optional - auto-created on first upload)" style="font-size:11px;padding:6px 10px">
+   <div style="display:flex;gap:6px">
+    <button id="sync-upload-gh" style="flex:1;background:#2962ff;border-color:#2962ff;color:#fff;font-size:11px;font-weight:600;padding:6px">⬆ Upload to Cloud</button>
+    <button id="sync-download-gh" style="flex:1;background:#1e222d;font-size:11px;padding:6px">⬇ Download from Cloud</button>
+   </div>
+   <label style="display:flex;align-items:center;gap:6px;font-size:11px;color:#c9ced8">
+    <input type="checkbox" id="sync-auto" style="width:14px;height:14px"> Auto-sync to cloud when drawings change
+   </label>
+  </div>
+ </div>
 </div>
 
 <!-- Fixed Symbol Search Modal (Never Clipped) -->
@@ -1053,23 +1124,106 @@ function commit(d){
 }
 
 function updateDrMenu(){
- if(sel&&(sel.type==='hline'||sel.type==='hray'||sel.type==='trend')){
+ if(sel){
   const P=sel.pts.map(q=>[X(q.t),Y(q.p)]);
   const mx=P.length>1?(P[0][0]+P[1][0])/2:P[0][0];
   const my=P.length>1?(P[0][1]+P[1][1])/2:P[0][1];
   $('dr-horiz').style.display=sel.type==='trend'?'inline-flex':'none';
-  $('dr-menu').style.left=Math.max(10,Math.min(pw-200,mx-80))+'px';
-  $('dr-menu').style.top=Math.max(10,my-36)+'px';
+  $('dr-alert').style.display=(sel.type==='trend'||sel.type==='hline'||sel.type==='hray')?'inline-flex':'none';
+  $('dr-col').value=sel.color||'#2962ff';
+  $('dr-w').value=(sel.w||2).toString();
+  $('dr-menu').style.left=Math.max(10,Math.min(pw-340,mx-120))+'px';
+  $('dr-menu').style.top=Math.max(10,my-42)+'px';
   $('dr-menu').hidden=false;
  }else{
   $('dr-menu').hidden=true;
  }
 }
 
+$('dr-col').oninput=e=>{
+ if(!sel)return;
+ snap();
+ sel.color=e.target.value;
+ saveDr();sched();
+};
+
+$('dr-w').onchange=e=>{
+ if(!sel)return;
+ snap();
+ sel.w=+e.target.value;
+ saveDr();sched();
+};
+
+$('dr-clone').onclick=()=>{
+ if(!sel)return;
+ snap();
+ const cloned=JSON.parse(JSON.stringify(sel));
+ cloned.id=Date.now()+Math.random();
+ cloned.pts.forEach(p=>{
+  p.t=tOf(idxOf(p.t)+4);
+  p.p=p.p*1.003;
+ });
+ drs.push(cloned);
+ sel=cloned;
+ saveDr();sched();updateDrMenu();
+ status('Drawing Cloned');setTimeout(()=>status(''),2000);
+};
+
+$('dr-label-btn').onclick=()=>{
+ if(!sel)return;
+ $('label-modal').hidden=false;
+ $('lbl-text').value=sel.text||'';
+ const curH=sel.labelH||'center';
+ const curV=sel.labelV||'top';
+ document.querySelectorAll('#lbl-h-btns .lbl-btn').forEach(b=>b.classList.toggle('on',b.dataset.h===curH));
+ document.querySelectorAll('#lbl-v-btns .lbl-btn').forEach(b=>b.classList.toggle('on',b.dataset.v===curV));
+ setTimeout(()=>$('lbl-text').focus(),50);
+};
+
+$('lbl-h-btns').onclick=e=>{
+ const b=e.target.closest('.lbl-btn');
+ if(b){
+  document.querySelectorAll('#lbl-h-btns .lbl-btn').forEach(s=>s.classList.remove('on'));
+  b.classList.add('on');
+ }
+};
+
+$('lbl-v-btns').onclick=e=>{
+ const b=e.target.closest('.lbl-btn');
+ if(b){
+  document.querySelectorAll('#lbl-v-btns .lbl-btn').forEach(s=>s.classList.remove('on'));
+  b.classList.add('on');
+ }
+};
+
+$('lbl-save').onclick=()=>{
+ if(!sel)return;
+ snap();
+ sel.text=$('lbl-text').value.trim();
+ const onH=document.querySelector('#lbl-h-btns .lbl-btn.on');
+ const onV=document.querySelector('#lbl-v-btns .lbl-btn.on');
+ sel.labelH=onH?onH.dataset.h:'center';
+ sel.labelV=onV?onV.dataset.v:'top';
+ $('label-modal').hidden=true;
+ saveDr();sched();
+ status('Label Applied');setTimeout(()=>status(''),2000);
+};
+
+$('lbl-clear').onclick=()=>{
+ if(!sel)return;
+ snap();
+ delete sel.text;
+ $('label-modal').hidden=true;
+ saveDr();sched();
+};
+
+$('lbl-close').onclick=()=>$('label-modal').hidden=true;
+$('label-modal').onclick=e=>{if(e.target.id==='label-modal')$('label-modal').hidden=true};
+
 $('dr-horiz').onclick=()=>{
  if(!sel||!sel.pts||sel.pts.length<2)return;
  snap();
- sel.pts[1].p=sel.pts[0].p; // Make end point price match start point price
+ sel.pts[1].p=sel.pts[0].p;
  status('Trendline set to horizontal');setTimeout(()=>status(''),2000);
  saveDr();sched();
 };
@@ -1086,11 +1240,15 @@ $('dr-alert').onclick=()=>{
  }
  $('dr-menu').hidden=true;
 };
+
 $('dr-del').onclick=()=>{
  if(!sel)return;
- snap();drs=drs.filter(d=>d!==sel);sel=null;
+ snap();
+ drs=drs.filter(d=>d!==sel);
+ sel=null;
  $('dr-menu').hidden=true;
  saveDr();sched();
+ status('Drawing Deleted');setTimeout(()=>status(''),2000);
 };
 
 function finishPoly(){
@@ -2093,6 +2251,11 @@ document.querySelectorAll('.mnav-btn').forEach(btn=>{
  };
 });
 
+if($('m-slider-tf')){
+ $('m-slider-tf').onclick = () => {
+  $('tf-modal').hidden = false;
+ };
+}
 // Mobile Timeframe Picker Bottom Sheet Click
 if($('tf-grid')){
  $('tf-grid').onclick=e=>{
@@ -2112,6 +2275,177 @@ if($('tf-grid')){
  $('tf-close').onclick=()=>{$('tf-modal').hidden=true;$('mnav-chart').click()};
  $('tf-modal').onclick=e=>{if(e.target.id==='tf-modal'){$('tf-modal').hidden=true;$('mnav-chart').click()}};
 }
+
+
+/* ---------- Cloud Storage & Cross-Device Sync System ---------- */
+const syncCfg = LS('sync_cfg', { user:'Bob', token:'', gistId:'', autoSync:false });
+
+function getSyncPayload(){
+ const allDrawings = {};
+ for(let i=0; i<localStorage.length; i++){
+  const k = localStorage.key(i);
+  if(k && k.startsWith('dr:')){
+   allDrawings[k] = LS(k, []);
+  }
+ }
+ return {
+  version: 1,
+  timestamp: Date.now(),
+  user: syncCfg.user || 'Bob',
+  cfg: cfg,
+  wls: wls,
+  alerts: alerts,
+  drawings: allDrawings
+ };
+}
+
+function applySyncPayload(data){
+ if(!data || typeof data !== 'object') throw Error('Invalid sync payload');
+ if(data.cfg) { Object.assign(cfg, data.cfg); SV('cfg', cfg); }
+ if(data.wls) { Object.assign(wls, data.wls); SV('wls', wls); }
+ if(Array.isArray(data.alerts)) { alerts = data.alerts; SV('alerts', alerts); updateAlertsUI(); }
+ if(data.drawings && typeof data.drawings === 'object'){
+  Object.keys(data.drawings).forEach(k => {
+   SV(k, data.drawings[k]);
+  });
+  drs = LS('dr:'+S.src+S.sym, []);
+ }
+ wlRender();
+ tfUI();
+ sched();
+ status('Sync Complete! Workspace Updated.');
+ setTimeout(()=>status(''), 3000);
+}
+
+// GitHub Gist Cloud Sync
+async function uploadToGist(){
+ const token = $('sync-token').value.trim();
+ if(!token) throw Error('GitHub token required');
+ syncCfg.token = token;
+ syncCfg.user = $('sync-user').value.trim() || 'Bob';
+ syncCfg.autoSync = $('sync-auto').checked;
+ SV('sync_cfg', syncCfg);
+
+ status('Uploading to Cloud…');
+ const payload = JSON.stringify(getSyncPayload(), null, 2);
+ const gistId = $('sync-gist-id').value.trim() || syncCfg.gistId;
+
+ let url = 'https://api.github.com/gists';
+ let method = 'POST';
+ if(gistId){
+  url += '/' + gistId;
+  method = 'PATCH';
+ }
+
+ const r = await fetch(url, {
+  method,
+  headers: {
+   'Authorization': 'Bearer ' + token,
+   'Accept': 'application/vnd.github+json',
+   'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+   description: 'MyCharts Cloud Sync (' + syncCfg.user + ')',
+   public: false,
+   files: { 'mycharts_sync.json': { content: payload } }
+  })
+ });
+
+ const res = await r.json();
+ if(!r.ok) throw Error(res.message || 'GitHub Upload Failed');
+ syncCfg.gistId = res.id;
+ SV('sync_cfg', syncCfg);
+ $('sync-gist-id').value = res.id;
+ status('Uploaded to GitHub Gist! ID: ' + res.id.slice(0,8));
+ setTimeout(()=>status(''), 3000);
+}
+
+async function downloadFromGist(){
+ const gistId = $('sync-gist-id').value.trim() || syncCfg.gistId;
+ const token = $('sync-token').value.trim() || syncCfg.token;
+ if(!gistId) throw Error('Gist ID required to download');
+ status('Downloading from Cloud…');
+
+ const headers = { 'Accept': 'application/vnd.github+json' };
+ if(token) headers['Authorization'] = 'Bearer ' + token;
+
+ const r = await fetch('https://api.github.com/gists/' + gistId, { headers });
+ const res = await r.json();
+ if(!r.ok) throw Error(res.message || 'GitHub Download Failed');
+ const file = res.files && res.files['mycharts_sync.json'];
+ if(!file || !file.content) throw Error('No mycharts_sync.json found in Gist');
+
+ const data = JSON.parse(file.content);
+ applySyncPayload(data);
+}
+
+// UI bindings for Sync Modal
+$('sync-btn').onclick = () => {
+ $('sync-modal').hidden = false;
+ $('sync-user').value = syncCfg.user || 'Bob';
+ $('sync-token').value = syncCfg.token || '';
+ $('sync-gist-id').value = syncCfg.gistId || '';
+ $('sync-auto').checked = !!syncCfg.autoSync;
+};
+$('sync-close').onclick = () => $('sync-modal').hidden = true;
+$('sync-modal').onclick = e => { if(e.target.id === 'sync-modal') $('sync-modal').hidden = true; };
+
+$('sync-copy-code').onclick = () => {
+ const str = btoa(unescape(encodeURIComponent(JSON.stringify(getSyncPayload()))));
+ navigator.clipboard.writeText(str).then(()=>{
+  status('Sync Code Copied to Clipboard!');
+  setTimeout(()=>status(''), 2500);
+ }).catch(()=>{
+  $('sync-code-input').value = str;
+  status('Code generated in box below');
+ });
+};
+
+$('sync-paste-code').onclick = () => {
+ const val = $('sync-code-input').value.trim();
+ if(!val) { status('Paste a sync code first', 1); return; }
+ try{
+  const json = decodeURIComponent(escape(atob(val)));
+  applySyncPayload(JSON.parse(json));
+  $('sync-modal').hidden = true;
+ }catch(e){
+  status('Invalid sync code: ' + e.message, 1);
+ }
+};
+
+$('sync-export-file').onclick = () => {
+ const blob = new Blob([JSON.stringify(getSyncPayload(), null, 2)], { type:'application/json' });
+ const a = document.createElement('a');
+ a.href = URL.createObjectURL(blob);
+ a.download = 'mycharts_backup_' + (new Date().toISOString().slice(0,10)) + '.json';
+ a.click();
+};
+
+$('sync-import-file').onclick = () => $('sync-file-input').click();
+$('sync-file-input').onchange = e => {
+ const file = e.target.files && e.target.files[0];
+ if(!file) return;
+ const reader = new FileReader();
+ reader.onload = ev => {
+  try{
+   applySyncPayload(JSON.parse(ev.target.result));
+   $('sync-modal').hidden = true;
+  }catch(err){ status('Error loading backup file', 1); }
+ };
+ reader.readAsText(file);
+};
+
+$('sync-upload-gh').onclick = () => uploadToGist().catch(e=>status(e.message, 1));
+$('sync-download-gh').onclick = () => downloadFromGist().catch(e=>status(e.message, 1));
+
+// Auto-upload hook on drawing save if enabled
+const originalSaveDr = saveDr;
+saveDr = function(){
+ originalSaveDr();
+ if(syncCfg.autoSync && syncCfg.token && syncCfg.gistId){
+  setTimeout(() => uploadToGist().catch(()=>{}), 2000);
+ }
+};
 
 /* ---------- Bootstrap ---------- */
 function resize(){
