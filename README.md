@@ -1,17 +1,22 @@
 # MyCharts
 
-A lightweight, custom web-based charting platform and TradingView alternative built for PC and mobile.
+A minimalist, high-performance web-based charting platform and TradingView alternative built for PC and mobile.
 
-- **Live Data**: Binance WebSocket & REST API for crypto, Twelve Data for forex.
-- **Bar Replay**: Replay historical price action at configurable speeds.
+![MyCharts Logo](logo.svg)
+
+- **Multi-Exchange Data Engine**:
+  - **Gate.io (Default)**: Global, unrestricted crypto feeds (REST + WebSocket) that work reliably worldwide without DNS or ISP blocks.
+  - **Binance**: Full spot crypto feeds with automatic failover to Gate.io if Binance is restricted by your local network.
+  - **Twelve Data**: Forex & international markets (works in demo mode for `EUR/USD`, or add your free key in ⚙ Settings).
+- **Live Streaming**: Real-time candle updates over WebSockets with automatic reconnection.
+- **Bar Replay**: Replay historical price action candle-by-candle at configurable speeds.
 - **Fair Value Gaps (FVG)**: Detection and visualization of bullish/bearish imbalances with mitigation tracking.
-- **Drawing Tools**: Trend lines, horizontal lines, vertical lines, rectangles, polylines, and long/short risk-reward calculators.
-- **Watchlists & Custom Timeframes**: Save multiple watchlists with 24h ticker updates and custom timeframe support.
-- **PWA (Progressive Web App)**: Installable on iOS and Android home screens as an offline-capable standalone app.
+- **Drawing Tools**: Trend lines, horizontal lines, vertical lines, rectangles, polylines, and long/short risk-reward calculators with touch hitboxes.
+- **Watchlists & Custom Timeframes**: Save multiple watchlists with 24h ticker updates and custom timeframe support (e.g. `7m`, `3h`, `2d`).
+- **PWA (Progressive Web App)**: Installable on iOS Safari and Android Chrome as a full-screen, standalone app.
 
 ## Live Access (GitHub Pages)
 
-Once GitHub Pages is enabled for this repository:
 **[https://bob-elly.github.io/MyCharts/](https://bob-elly.github.io/MyCharts/)**
 
 ### Mobile Installation (PWA)
