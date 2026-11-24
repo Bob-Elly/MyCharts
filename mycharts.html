@@ -1112,7 +1112,12 @@ function hit(x,y){
  }
 }
 
-const saveDr=()=>SV('dr:'+S.src+S.sym,drs);
+function saveDr(){
+ SV('dr:'+S.src+S.sym,drs);
+ if(typeof syncCfg!=='undefined' && syncCfg.autoSync && syncCfg.token && syncCfg.gistId){
+  setTimeout(() => uploadToGist().catch(()=>{}), 2000);
+ }
+}
 const snap=()=>{hist.push(JSON.stringify(drs));if(hist.length>100)hist.shift();redoS=[]};
 function undo(){if(!hist.length)return;redoS.push(JSON.stringify(drs));drs=JSON.parse(hist.pop());sel=null;draft=null;saveDr();sched()}
 function redo(){if(!redoS.length)return;hist.push(JSON.stringify(drs));drs=JSON.parse(redoS.pop());sel=null;draft=null;saveDr();sched()}
@@ -2505,14 +2510,7 @@ $('sync-file-input').onchange = e => {
 $('sync-upload-gh').onclick = () => uploadToGist().catch(e=>status(e.message, 1));
 $('sync-download-gh').onclick = () => downloadFromGist().catch(e=>status(e.message, 1));
 
-// Auto-upload hook on drawing save if enabled
-const originalSaveDr = saveDr;
-saveDr = function(){
- originalSaveDr();
- if(syncCfg.autoSync && syncCfg.token && syncCfg.gistId){
-  setTimeout(() => uploadToGist().catch(()=>{}), 2000);
- }
-};
+
 
 /* ---------- Bootstrap ---------- */
 function resize(){
