@@ -311,7 +311,7 @@ const FAV=['1m','5m','15m','30m','1h','4h','1d','1w','1M'];
 const cv=$('cv'),ctx=cv.getContext('2d'),AX=76,AY=26;
 let raw=[],D=[],fvgs=[],tfmin=60,base=60,tfms=36e5,atr=1,bw=8,off=6,W=0,H=0,pw=0,ph=0,lo=0,hi=1,m=null,raf=0,rb=0;
 let tool='cursor',drs=[],sel=null,draft=null,drag=null,down=null,ws=null,poll=null,loadId=0,dw=2,dcol='#2962ff';
-let Dfull=[],rp=null,hist=[],redoS=[],ptrs=new Map(),pinch=null,playT=0,cs=0;
+let Dfull=[],rp=null,hist=[],redoS=[],ptrs=new Map(),playT=0,cs=0;
 
 // Vertical panning and scaling variables (like TradingView)
 let vShift=0;
@@ -1152,11 +1152,6 @@ function updateAlertsUI(){
 cv.onpointerdown=e=>{
  cv.setPointerCapture(e.pointerId);
  const[x,y]=pos(e);m={x,y};ptrs.set(e.pointerId,[x,y]);
- if(ptrs.size===2){
-  const[a,b]=[...ptrs.values()];
-  pinch={d:Math.hypot(a[0]-b[0],a[1]-b[1])||1,bw:bw,idx:idxAt((a[0]+b[0])/2)};
-  drag=null;draft=null;return;
- }
  if(!D.length)return;
  down={x,y};
 
@@ -1232,12 +1227,6 @@ cv.onpointerdown=e=>{
 cv.onpointermove=e=>{
  const[x,y]=pos(e);m={x,y};
  if(ptrs.has(e.pointerId))ptrs.set(e.pointerId,[x,y]);
- if(pinch&&ptrs.size===2){
-  const[a,b]=[...ptrs.values()],d=Math.hypot(a[0]-b[0],a[1]-b[1])||1,mx=(a[0]+b[0])/2;
-  bw=Math.max(1.5,Math.min(60,pinch.bw*d/pinch.d));
-  off=pinch.idx-(mx-pw)/bw-(D.length-1);
-  sched();return;
- }
 
  if(draft){
   draft.pts[draft.pts.length-1]=pt(x,y);
@@ -1285,7 +1274,6 @@ cv.onpointermove=e=>{
 
 cv.onpointerup=e=>{
  ptrs.delete(e.pointerId);
- if(ptrs.size<2)pinch=null;
  if(draft&&draft.sx!=null){
   const[x,y]=pos(e);
   if(Math.hypot(x-draft.sx,y-draft.sy)>6){
@@ -1311,6 +1299,7 @@ cv.onmouseleave=()=>{m=null;$('ohlc').innerHTML='';sched()};
 // Horizontal wheel or Shift+Wheel scales horizontal time (bw)
 cv.addEventListener('wheel',e=>{
  e.preventDefault();if(!D.length)return;
+ if(e.ctrlKey)return; // ignore trackpad pinch gestures
  if(e.shiftKey||Math.abs(e.deltaX)>Math.abs(e.deltaY)){
   const dX=e.shiftKey?e.deltaY:e.deltaX;
   const[x]=pos(e),idx=idxAt(x);
@@ -1730,7 +1719,7 @@ $('rf').onclick=()=>{setPlay(0);step(1)};
 $('rpl').onclick=togglePlay;
 $('rx').onclick=exitRp;
 
-cv.onpointercancel=e=>{ptrs.delete(e.pointerId);pinch=null;drag=null};
+cv.onpointercancel=e=>{ptrs.delete(e.pointerId);drag=null};
 if('serviceWorker' in navigator&&/^https?:/.test(location.protocol))navigator.serviceWorker.register('sw.js').catch(()=>{});
 
 /* ---------- Bootstrap ---------- */
