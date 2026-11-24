@@ -488,12 +488,12 @@ async function fetchGate(sym,iv,pages,endT){
  return out;
 }
 
-// Multi-mirror Binance fetcher
+// Multi-mirror Binance fetcher with unblocked data-api.binance.vision primary
 async function fetchBn(sym,iv,pages,endT){
  const cleanSym=sym.replace(/[/_-]/g,'');
  const mirrors=[
-  'https://api.binance.com/api/v3/klines',
   'https://data-api.binance.vision/api/v3/klines',
+  'https://api.binance.com/api/v3/klines',
   'https://api1.binance.com/api/v3/klines',
   'https://api2.binance.com/api/v3/klines',
   'https://api3.binance.com/api/v3/klines'
@@ -504,7 +504,7 @@ async function fetchBn(sym,iv,pages,endT){
    let out=[],end=endT||Date.now()+1;
    for(let p=0;p<pages;p++){
     const ctrl=new AbortController();
-    const tid=setTimeout(()=>ctrl.abort(),4500);
+    const tid=setTimeout(()=>ctrl.abort(),3500);
     const r=await fetch(`${base}?symbol=${cleanSym}&interval=${iv}&limit=1000&endTime=${end}`,{signal:ctrl.signal});
     clearTimeout(tid);
     const a=await r.json();
@@ -667,10 +667,24 @@ async function load(){
 function live(my,iv){
  if(S.src==='bn'){
   const cleanSym=S.sym.toLowerCase().replace(/[/_-]/g,'');
+  const wsMirrors=[
+   `wss://data-stream.binance.vision/ws/${cleanSym}@kline_${iv}`,
+   `wss://stream.binance.com:9443/ws/${cleanSym}@kline_${iv}`
+  ];
+  let curMirror=0;
   const open=()=>{
-   ws=new WebSocket(`wss://stream.binance.com:9443/ws/${cleanSym}@kline_${iv}`);
-   ws.onmessage=e=>{const k=JSON.parse(e.data).k;if(k)upsert({t:k.t,o:+k.o,h:+k.h,l:+k.l,c:+k.c})};
-   ws.onclose=()=>{if(my===loadId)setTimeout(()=>my===loadId&&open(),2500)};
+   const url=wsMirrors[curMirror%wsMirrors.length];
+   ws=new WebSocket(url);
+   ws.onmessage=e=>{
+    try{
+     const k=JSON.parse(e.data).k;
+     if(k)upsert({t:k.t,o:+k.o,h:+k.h,l:+k.l,c:+k.c});
+    }catch{}
+   };
+   ws.onclose=()=>{
+    curMirror++;
+    if(my===loadId)setTimeout(()=>my===loadId&&open(),2500);
+   };
    ws.onerror=()=>{try{ws.close()}catch{}};
   };open();
  }else if(S.src==='gate'){
@@ -743,7 +757,17 @@ function render(d,isSel){
 }
 
 function handles(d){
- const P=d.pts.map(q=>[X(q.t),Y(q.p)]),H=P.map((p,i)=>({x:p[0],y:p[1],k:i}));
+ const P=d.pts.map(q=>[X(q.t),Y(q.p)]);
+ if(d.type==='rect'&&P.length>=2){
+  const a=P[0],b=P[1];
+  // 3 pull points: Corner 1 (top-left), Corner 2 (bottom-right), Pull Point 3 (top-right)
+  return [
+   {x:a[0],y:a[1],k:0},
+   {x:b[0],y:b[1],k:1},
+   {x:b[0],y:a[1],k:2}
+  ];
+ }
+ const H=P.map((p,i)=>({x:p[0],y:p[1],k:i}));
  if(d.type==='hline')H[0].x=pw/2;
  if(d.type==='hray')H[0].x=P[0][0];
  if(d.type==='vline')H[0].y=ph/2;
@@ -944,50 +968,67 @@ function draw(){
   }
  }
 
- // Precision Crosshair (Centered directly under mouse cursor)
+ // Precision Crosshair (Centered with Pin Effect when Magnet is ON)
  if(m&&m.y>=0&&m.y<ph){
   const isOverChart=m.x>=0&&m.x<pw;
-  ctx.strokeStyle='#4a5568';ctx.lineWidth=1;ctx.setLineDash([3,3]);ctx.beginPath();
-  ctx.moveTo(0,Math.round(m.y)+.5);ctx.lineTo(pw,Math.round(m.y)+.5);
+  let chX=m.x,chY=m.y,isPinned=false;
+  if(magnetOn&&isOverChart){
+   const sn=getSnapped(m.x,m.y);
+   if(sn.snapped){
+    chX=sn.x;chY=sn.y;isPinned=true;
+   }
+  }
+
+  ctx.strokeStyle=isPinned?'#00e676':'#4a5568';
+  ctx.lineWidth=1;ctx.setLineDash([3,3]);ctx.beginPath();
+  ctx.moveTo(0,Math.round(chY)+.5);ctx.lineTo(pw,Math.round(chY)+.5);
   if(isOverChart){
-   ctx.moveTo(Math.round(m.x)+.5,0);ctx.lineTo(Math.round(m.x)+.5,ph);
+   ctx.moveTo(Math.round(chX)+.5,0);ctx.lineTo(Math.round(chX)+.5,ph);
   }
   ctx.stroke();ctx.setLineDash([]);
   
   // Price tag on price axis
-  const p=pAt(m.y);
-  ctx.fillStyle='#2962ff';ctx.fillRect(pw,m.y-10,AX,20);
-  ctx.fillStyle='#fff';ctx.textAlign='left';ctx.fillText(fmt(p),pw+22,m.y+4);
+  const p=pAt(chY);
+  ctx.fillStyle='#2962ff';ctx.fillRect(pw,chY-10,AX,20);
+  ctx.fillStyle='#fff';ctx.textAlign='left';ctx.fillText(fmt(p),pw+22,chY+4);
   
   // (+) Icon on price axis / at end of horizontal line (TradingView UI)
-  ctx.beginPath();ctx.arc(pw+10,m.y,7,0,7);ctx.fillStyle='#1e2638';ctx.fill();
+  ctx.beginPath();ctx.arc(pw+10,chY,7,0,7);ctx.fillStyle='#1e2638';ctx.fill();
   ctx.strokeStyle='#fff';ctx.lineWidth=1.5;ctx.stroke();
-  ctx.beginPath();ctx.moveTo(pw+7,m.y);ctx.lineTo(pw+13,m.y);ctx.moveTo(pw+10,m.y-3);ctx.lineTo(pw+10,m.y+3);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(pw+7,chY);ctx.lineTo(pw+13,chY);ctx.moveTo(pw+10,chY-3);ctx.lineTo(pw+10,chY+3);ctx.stroke();
   
   // Time tag & OHLC
   if(isOverChart){
-   const curI=Math.round(idxAt(m.x));
+   const curI=Math.round(idxAt(chX));
    if(curI>=0&&curI<n){
     const b=D[curI],d=new Date(b.t),s=d.toLocaleString([],{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
-    ctx.fillRect(m.x-45,ph,90,18);ctx.fillStyle='#fff';ctx.textAlign='center';ctx.fillText(s,m.x,ph+13);
+    ctx.fillRect(chX-45,ph,90,18);ctx.fillStyle='#fff';ctx.textAlign='center';ctx.fillText(s,chX,ph+13);
     $('ohlc').innerHTML=`<span style="color:#fff;font-weight:600">${S.sym} · ${S.tf}</span> O:${fmt(b.o)} H:${fmt(b.h)} L:${fmt(b.l)} C:${fmt(b.c)} <span style="color:${b.c>=b.o?'#26a69a':'#ef5350'}">${((b.c-b.o)/b.o*100).toFixed(2)}%</span>`;
    }
 
-   // Magnet target snap ring (shows target on candle without warping crosshair!)
-   if(magnetOn){
-    const sn=getSnapped(m.x,m.y);
-    if(sn.snapped){
-     ctx.beginPath();ctx.arc(sn.x,sn.y,4,0,7);ctx.fillStyle='#00e676';ctx.fill();
-     ctx.strokeStyle='#fff';ctx.lineWidth=1.5;ctx.stroke();
-    }
+   // Visual Pin Ring when Magnet snaps to OHLC
+   if(isPinned){
+    ctx.beginPath();ctx.arc(chX,chY,4.5,0,7);ctx.fillStyle='#00e676';ctx.fill();
+    ctx.strokeStyle='#fff';ctx.lineWidth=1.5;ctx.stroke();
    }
   }
  }
 
- // Last price tag and Bar Close Countdown (TradingView UI)
+ // Last price tag, horizontal dotted line, and Bar Close Countdown (TradingView UI)
  const curB=D[n-1];
  if(curB){
   const y=Y(curB.c);
+  // Horizontal dotted line for current price (0.8px TradingView style)
+  ctx.save();
+  ctx.strokeStyle=curB.c>=curB.o?'#26a69a':'#ef5350';
+  ctx.lineWidth=0.8;
+  ctx.setLineDash([2,3]);
+  ctx.beginPath();
+  ctx.moveTo(0,Math.round(y)+.5);
+  ctx.lineTo(pw,Math.round(y)+.5);
+  ctx.stroke();
+  ctx.restore();
+
   ctx.fillStyle=curB.c>=curB.o?'#26a69a':'#ef5350';ctx.fillRect(pw,y-10,AX,20);
   ctx.fillStyle='#fff';ctx.textAlign='left';ctx.fillText(fmt(curB.c),pw+6,y+4);
   
@@ -1012,19 +1053,6 @@ const pos=e=>{
  const r=cv.getBoundingClientRect();
  return[e.clientX-r.left,e.clientY-r.top];
 };
-
-function snapAnglePoint(x,y,shiftKey){
- if((angleSnapOn||shiftKey)&&draft&&draft.type==='trend'&&draft.sx!=null){
-  const dx=x-draft.sx,dy=y-draft.sy;
-  const r=Math.hypot(dx,dy);
-  if(r>=3){
-   const theta=Math.atan2(dy,dx);
-   const snapRad=Math.round(theta/(Math.PI/4))*(Math.PI/4);
-   return[draft.sx+r*Math.cos(snapRad),draft.sy+r*Math.sin(snapRad)];
-  }
- }
- return[x,y];
-}
 
 let pendingAlert=null;
 function openCreateAlert(opt){
@@ -1131,8 +1159,7 @@ cv.onpointerdown=e=>{
   }else{
    if(!draft)draft={type:tool,pts:[p,{...p}],w:dw,color:dcol,sx:x,sy:y};
    else{
-    const[tx,ty]=snapAnglePoint(x,y,e.shiftKey);
-    draft.pts[1]=pt(tx,ty);
+    draft.pts[1]=p;
     commit(draft);
    }
   }
@@ -1173,8 +1200,7 @@ cv.onpointermove=e=>{
  }
 
  if(draft){
-  const[targetX,targetY]=snapAnglePoint(x,y,e.shiftKey);
-  draft.pts[draft.pts.length-1]=pt(targetX,targetY);
+  draft.pts[draft.pts.length-1]=pt(x,y);
  }
 
  // Dragging a handle to modify drawing
@@ -1186,6 +1212,7 @@ cv.onpointermove=e=>{
   else if(k==='tg')sel.tg=p;
   else if(sel.s!=null&&k===1){sel.pts[1]={t,p:sel.pts[0].p}}
   else if(sel.s!=null&&k===0){sel.pts[0]={t,p};sel.pts[1].p=p}
+  else if(sel.type==='rect'&&k===2){sel.pts[1].t=t;sel.pts[0].p=p}
   else sel.pts[k]={t,p};
   updateDrMenu();
  }
@@ -1222,8 +1249,7 @@ cv.onpointerup=e=>{
  if(draft&&draft.sx!=null){
   const[x,y]=pos(e);
   if(Math.hypot(x-draft.sx,y-draft.sy)>6){
-   const[targetX,targetY]=snapAnglePoint(x,y,e.shiftKey);
-   draft.pts[1]=pt(targetX,targetY);
+   draft.pts[1]=pt(x,y);
    commit(draft);
   }
  }
@@ -1550,20 +1576,28 @@ async function wlPrices(){
  // Binance symbols
  const bIdx=L.map((x,i)=>x.src==='bn'?i:-1).filter(i=>i>=0);
  if(bIdx.length){
-  try{
-   const r=await fetch('https://api.binance.com/api/v3/ticker/24hr?symbols='+encodeURIComponent(JSON.stringify(bIdx.map(i=>normSym('bn',L[i].sym)))));
-   const a=await r.json();
-   if(Array.isArray(a)){
-    a.forEach(t=>{
-     bIdx.forEach(i=>{
-      if(normSym('bn',L[i].sym)===t.symbol&&$('wp'+i)){
-       const c=+t.priceChangePercent;
-       $('wp'+i).innerHTML=`<span class="p-val">${fmt(+t.lastPrice)}</span><span class="p-chg ${c>=0?'up':'dn'}">${c>=0?'+':''}${c.toFixed(2)}%</span>`;
-      }
+  const syms=bIdx.map(i=>normSym('bn',L[i].sym));
+  const bMirrors=[
+   'https://data-api.binance.vision/api/v3/ticker/24hr',
+   'https://api.binance.com/api/v3/ticker/24hr'
+  ];
+  for(const bm of bMirrors){
+   try{
+    const r=await fetch(bm+'?symbols='+encodeURIComponent(JSON.stringify(syms)),{signal:AbortSignal.timeout(3500)});
+    const a=await r.json();
+    if(Array.isArray(a)){
+     a.forEach(t=>{
+      bIdx.forEach(i=>{
+       if(normSym('bn',L[i].sym)===t.symbol&&$('wp'+i)){
+        const c=+t.priceChangePercent;
+        $('wp'+i).innerHTML=`<span class="p-val">${fmt(+t.lastPrice)}</span><span class="p-chg ${c>=0?'up':'dn'}">${c>=0?'+':''}${c.toFixed(2)}%</span>`;
+       }
+      });
      });
-    });
-   }
-  }catch{}
+     break;
+    }
+   }catch{}
+  }
  }
 }
 
