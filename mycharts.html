@@ -20,22 +20,26 @@ html,body{height:100%;width:100%;background:#0e1117;color:#c9ced8;font:13px syst
 #brand{display:flex;align-items:center;gap:6px;font-weight:700;font-size:14px;letter-spacing:-0.2px;padding-right:10px;border-right:1px solid #232a36;flex-shrink:0;cursor:pointer}
 #brand svg{flex-shrink:0}
 
-/* Symbol selector container with autocomplete */
-#sym-box{position:relative;display:flex;align-items:center}
-#sym{width:110px;font-weight:600;padding:4px 8px;cursor:pointer}
-#sym-search-dropdown{position:absolute;top:calc(100% + 4px);left:0;width:320px;max-height:420px;background:#151a23;border:1px solid #2a3342;border-radius:8px;box-shadow:0 12px 36px rgba(0,0,0,.7);z-index:100;display:flex;flex-direction:column;overflow:hidden}
-#sym-search-dropdown[hidden]{display:none}
-#search-input-wrap{padding:8px;border-bottom:1px solid #232a36;background:#181e28}
-#search-input{width:100%;padding:6px 10px;font-size:12px;background:#11151c;border:1px solid #2a3342;border-radius:5px;color:#fff}
-#search-tabs{display:flex;gap:4px;padding:6px 8px;border-bottom:1px solid #232a36;background:#131822}
-.stab{padding:3px 8px;font-size:11px;border-radius:4px;cursor:pointer;background:transparent;border:none;color:#9aa3b2}
+/* Symbol Button with search badge */
+#sym-btn{display:flex;align-items:center;gap:6px;font-weight:600;padding:4px 10px;background:#1d2430;border:1px solid #2a3342;border-radius:6px;cursor:pointer}
+#sym-btn:hover{background:#273042;border-color:#2962ff}
+
+/* Symbol Search Modal (Fixed Overlay - Never Clipped) */
+#search-modal{position:fixed;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:flex-start;justify-content:center;padding-top:70px;z-index:999;backdrop-filter:blur(5px)}
+#search-modal[hidden]{display:none}
+#search-box{background:#151a23;border:1px solid #2a3342;border-radius:10px;width:min(520px,94vw);max-height:80vh;box-shadow:0 16px 48px rgba(0,0,0,.8);display:flex;flex-direction:column;overflow:hidden}
+#search-header{padding:10px;border-bottom:1px solid #232a36;background:#181e28;display:flex;gap:8px;align-items:center}
+#search-input{flex:1;padding:8px 12px;font-size:13px;background:#11151c;border:1px solid #2a3342;border-radius:6px;color:#fff;outline:none}
+#search-input:focus{border-color:#2962ff}
+#search-tabs{display:flex;gap:4px;padding:8px 10px;border-bottom:1px solid #232a36;background:#131822}
+.stab{padding:4px 10px;font-size:11px;font-weight:600;border-radius:4px;cursor:pointer;background:transparent;border:none;color:#9aa3b2}
 .stab.on{background:#2962ff;color:#fff}
-#search-results{flex:1;overflow-y:auto;display:flex;flex-direction:column;max-height:300px}
-.s-item{display:flex;align-items:center;gap:8px;padding:8px 10px;cursor:pointer;border-bottom:1px solid #1a202c;transition:background .15s}
+#search-results{flex:1;overflow-y:auto;display:flex;flex-direction:column;max-height:340px}
+.s-item{display:flex;align-items:center;gap:10px;padding:9px 12px;cursor:pointer;border-bottom:1px solid #1a202c;transition:background .15s}
 .s-item:hover{background:#1d2430}
-.s-item .s-sym{font-weight:600;color:#fff;font-size:12px}
+.s-item .s-sym{font-weight:600;color:#fff;font-size:13px}
 .s-item .s-desc{font-size:11px;color:#8a919e;flex:1}
-.s-item .s-tag{font-size:10px;padding:2px 5px;border-radius:3px;background:#232a36;color:#9aa3b2;text-transform:uppercase}
+.s-item .s-tag{font-size:10px;padding:2px 6px;border-radius:3px;background:#232a36;color:#9aa3b2;text-transform:uppercase}
 
 /* Left Tools Toolbar (TradingView style) */
 #tools{background:#151a23;border-right:1px solid #232a36;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0;overflow-y:auto;z-index:5}
@@ -50,6 +54,27 @@ html,body{height:100%;width:100%;background:#0e1117;color:#c9ced8;font:13px syst
 #cw{position:relative;width:100%;height:100%;overflow:hidden;background:#0e1117}
 #cv{position:absolute;left:0;top:0;width:100%;height:100%;cursor:crosshair;touch-action:none}
 #ohlc{position:absolute;left:10px;top:8px;font-size:12px;pointer-events:none;color:#9aa3b2;display:flex;gap:8px;align-items:center;background:rgba(21,26,35,.8);padding:3px 8px;border-radius:4px;backdrop-filter:blur(4px);z-index:2}
+
+/* Floating Drawing Action Menu */
+#dr-menu{position:absolute;display:flex;gap:4px;align-items:center;background:#151a23;border:1px solid #2a3342;border-radius:6px;padding:3px 6px;box-shadow:0 6px 18px rgba(0,0,0,.6);z-index:20}
+#dr-menu[hidden]{display:none}
+#dr-menu button{font-size:11px;padding:3px 6px;border-radius:4px;display:flex;align-items:center;gap:4px}
+
+/* Alerts List Modal */
+#alerts-modal{position:fixed;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;z-index:999;backdrop-filter:blur(5px)}
+#alerts-modal[hidden]{display:none}
+#alerts-box{background:#151a23;border:1px solid #2a3342;border-radius:10px;width:min(440px,94vw);max-height:80vh;box-shadow:0 16px 48px rgba(0,0,0,.8);display:flex;flex-direction:column;overflow:hidden}
+#alerts-head{padding:12px 16px;border-bottom:1px solid #232a36;background:#181e28;display:flex;justify-content:space-between;align-items:center}
+#alerts-list{flex:1;overflow-y:auto;display:flex;flex-direction:column;padding:8px}
+.alert-row{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:6px;border-bottom:1px solid #1a202c}
+.alert-row .a-sym{font-weight:600;color:#fff}
+.alert-row .a-price{font-weight:600;color:#2962ff}
+.alert-row .a-note{font-size:11px;color:#8a919e;flex:1}
+
+/* Create Alert Modal */
+#create-alert-modal{position:fixed;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;z-index:1000;backdrop-filter:blur(5px)}
+#create-alert-modal[hidden]{display:none}
+#create-alert-box{background:#151a23;border:1px solid #2a3342;border-radius:10px;width:min(380px,94vw);padding:18px;box-shadow:0 16px 48px rgba(0,0,0,.8);display:flex;flex-direction:column}
 
 /* Right Watchlist Panel */
 #wl{background:#151a23;border-left:1px solid #232a36;display:flex;flex-direction:column;height:100%;overflow:hidden;z-index:5}
@@ -135,23 +160,16 @@ button.on{background:#2962ff;border-color:#2962ff;color:#fff}
   <option value="fx">Forex</option>
  </select>
  
- <div id="sym-box">
-  <input id="sym" spellcheck="false" title="Click to search symbol">
-  <div id="sym-search-dropdown" hidden>
-   <div id="search-input-wrap">
-    <input id="search-input" placeholder="Search pairs (e.g. BTC, Solana, EUR, Gold)..." spellcheck="false">
-   </div>
-   <div id="search-tabs">
-    <button class="stab on" data-cat="all">All</button>
-    <button class="stab" data-cat="crypto">Crypto</button>
-    <button class="stab" data-cat="fx">Forex & Metals</button>
-   </div>
-   <div id="search-results"></div>
-  </div>
- </div>
+ <button id="sym-btn" title="Search symbol (TradingView style)">
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+  <span id="sym-label">BTC_USDT</span>
+ </button>
 
  <span id="tfs"></span>
  <input id="ctf" size="9" placeholder="custom: 7m" spellcheck="false">
+ 
+ <button id="fvgtog" class="on" title="Toggle Fair Value Gaps (FVG)">FVG</button>
+ <button id="alert-btn" title="Price & Drawing Alerts">🔔 <span id="alert-cnt">0</span></button>
  <button id="rpbtn" title="Bar replay">⏪ Replay</button>
  <button id="more" title="Load older history">⟲</button>
  <button id="gear" title="Settings">⚙</button>
@@ -166,6 +184,10 @@ button.on{background:#2962ff;border-color:#2962ff;color:#fff}
 <div id="cw">
  <canvas id="cv"></canvas>
  <div id="ohlc"></div>
+ <div id="dr-menu" hidden>
+  <button id="dr-alert" title="Set alert on this drawing">🔔 Alert</button>
+  <button id="dr-del" title="Delete drawing">🗑 Delete</button>
+ </div>
  <div id="rp" hidden>
   <button id="rb" title="Step back">◀</button>
   <button id="rpl" title="Play / pause">▶</button>
@@ -188,6 +210,67 @@ button.on{background:#2962ff;border-color:#2962ff;color:#fff}
   <button id="wadd">+ Add Current Symbol</button>
  </div>
 </div>
+</div>
+
+<!-- Fixed Symbol Search Modal (Never Clipped) -->
+<div id="search-modal" hidden>
+ <div id="search-box">
+  <div id="search-header">
+   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9aa3b2" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+   <input id="search-input" placeholder="Search pairs (e.g. BTC, SOL, EUR, Gold, ETH)..." spellcheck="false">
+   <button id="search-close" style="background:transparent;border:none;font-size:16px;cursor:pointer">✕</button>
+  </div>
+  <div id="search-tabs">
+   <button class="stab on" data-cat="all">All</button>
+   <button class="stab" data-cat="crypto">Crypto</button>
+   <button class="stab" data-cat="fx">Forex & Metals</button>
+  </div>
+  <div id="search-results"></div>
+ </div>
+</div>
+
+<!-- Alerts Manager Modal -->
+<div id="alerts-modal" hidden>
+ <div id="alerts-box">
+  <div id="alerts-head">
+   <b style="font-size:14px;color:#fff">Active Price Alerts</b>
+   <button id="alerts-close" style="background:transparent;border:none;font-size:16px;cursor:pointer">✕</button>
+  </div>
+  <div id="alerts-list"></div>
+ </div>
+</div>
+
+<!-- Create Alert Modal (TradingView Style) -->
+<div id="create-alert-modal" hidden>
+ <div id="create-alert-box">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;border-bottom:1px solid #232a38;padding-bottom:8px">
+   <b style="color:#fff;font-size:14px" id="ca-title">🔔 Create Alert</b>
+   <button id="ca-close" style="background:transparent;border:none;color:#8a919e;font-size:16px;cursor:pointer">✕</button>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:10px">
+   <div>
+    <label style="font-size:11px;color:#8a919e;display:block;margin-bottom:3px">Condition</label>
+    <select id="ca-cond" style="width:100%;padding:6px 8px;background:#0d1117;color:#fff;border:1px solid #273042;border-radius:4px">
+     <option value="cross">Crossing</option>
+     <option value="reach">Reaches / Touching</option>
+     <option value="close_above">Closes Above</option>
+     <option value="close_below">Closes Below</option>
+    </select>
+   </div>
+   <div id="ca-price-row">
+    <label style="font-size:11px;color:#8a919e;display:block;margin-bottom:3px">Price Level</label>
+    <input id="ca-price" type="number" step="any" style="width:100%;padding:6px 8px;background:#0d1117;color:#fff;border:1px solid #273042;border-radius:4px">
+   </div>
+   <div>
+    <label style="font-size:11px;color:#8a919e;display:block;margin-bottom:3px">Message</label>
+    <input id="ca-msg" type="text" style="width:100%;padding:6px 8px;background:#0d1117;color:#fff;border:1px solid #273042;border-radius:4px">
+   </div>
+   <div style="display:flex;gap:8px;margin-top:6px">
+    <button id="ca-save" style="flex:1;padding:8px;background:#2962ff;color:#fff;border:none;border-radius:4px;cursor:pointer;font-weight:600">Create</button>
+    <button id="ca-cancel" style="padding:8px 14px;background:#232a38;color:#ccc;border:none;border-radius:4px;cursor:pointer">Cancel</button>
+   </div>
+  </div>
+ </div>
 </div>
 
 <!-- Settings modal -->
@@ -223,7 +306,7 @@ const NB={1:'1m',3:'3m',5:'5m',15:'15m',30:'30m',60:'1h',120:'2h',240:'4h',360:'
 const NF={1:'1min',5:'5min',15:'15min',30:'30min',45:'45min',60:'1h',120:'2h',240:'4h',1440:'1day',10080:'1week',43200:'1month'};
 const FAV=['1m','5m','15m','30m','1h','4h','1d','1w','1M'];
 
-const cv=$('cv'),ctx=cv.getContext('2d'),AX=70,AY=26;
+const cv=$('cv'),ctx=cv.getContext('2d'),AX=76,AY=26;
 let raw=[],D=[],fvgs=[],tfmin=60,base=60,tfms=36e5,atr=1,bw=8,off=6,W=0,H=0,pw=0,ph=0,lo=0,hi=1,m=null,raf=0,rb=0;
 let tool='cursor',drs=[],sel=null,draft=null,drag=null,down=null,ws=null,poll=null,loadId=0,dw=2,dcol='#2962ff';
 let Dfull=[],rp=null,hist=[],redoS=[],ptrs=new Map(),pinch=null,playT=0,cs=0;
@@ -235,6 +318,9 @@ let vZoom=1;
 // Magnet & Angle tools
 let magnetOn=LS('magnetOn',false);
 let angleSnapOn=LS('angleSnapOn',false);
+
+// Alerts system
+let alerts=LS('alerts',[]);
 
 const coarse=matchMedia('(pointer:coarse)').matches,TH=coarse?16:7,HR=coarse?20:9;
 
@@ -261,8 +347,8 @@ const PRESETS=[
  {sym:'',bn:'',fx:'USD/CHF',name:'US Dollar / Swiss Franc',cat:'fx'},
  {sym:'',bn:'',fx:'AUD/USD',name:'Australian Dollar / USD',cat:'fx'},
  {sym:'',bn:'',fx:'USD/CAD',name:'US Dollar / Canadian Dollar',cat:'fx'},
- {sym:'',bn:'',fx:'XAU/USD',name:'Gold / US Dollar',cat:'fx'},
- {sym:'',bn:'',fx:'XAG/USD',name:'Silver / US Dollar',cat:'fx'}
+ {sym:'',bn:'',fx:'XAU/USD',name:'Gold Spot / U.S. Dollar',cat:'fx'},
+ {sym:'',bn:'',fx:'XAG/USD',name:'Silver Spot / U.S. Dollar',cat:'fx'}
 ];
 
 /* ---------- Helpers & Formatters ---------- */
@@ -290,7 +376,7 @@ function tOf(i){
 }
 const X=t=>xAt(idxOf(t)),Y=p=>yAt(p);
 
-// Magnet Snap detection (finds nearest OHLC of nearest candle)
+// Magnet Snap detection
 function getSnapped(x,y){
  if(!magnetOn||!D.length)return{x,y,p:pAt(y),t:tOf(idxAt(x)),snapped:false};
  const curI=Math.round(idxAt(x));
@@ -304,8 +390,7 @@ function getSnapped(x,y){
  }
  const snapPxY=yAt(bestP);
  const snapPxX=xAt(i);
- // Only snap if within reasonable distance (35px)
- if(Math.hypot(x-snapPxX,y-snapPxY)<35){
+ if(Math.hypot(x-snapPxX,y-snapPxY)<38){
   return{x:snapPxX,y:snapPxY,p:bestP,t:b.t,snapped:true};
  }
  return{x,y,p:curP,t:tOf(idxAt(x)),snapped:false};
@@ -359,6 +444,23 @@ function symBadge(sym,src){
   bg='#374151';
  }
  return`<div class="sym-icon" style="background:${bg}">${txt}</div>`;
+}
+
+/* ---------- Audio Chime Synthesizer (Web Audio API) ---------- */
+function playChime(){
+ try{
+  const AudioCtx=window.AudioContext||window.webkitAudioContext;
+  if(!AudioCtx)return;
+  const actx=new AudioCtx();
+  const o1=actx.createOscillator(),o2=actx.createOscillator(),g=actx.createGain();
+  o1.type='sine';o1.frequency.setValueAtTime(587.33,actx.currentTime); // D5
+  o2.type='sine';o2.frequency.setValueAtTime(880,actx.currentTime+0.1); // A5
+  g.gain.setValueAtTime(0.2,actx.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.001,actx.currentTime+0.6);
+  o1.connect(g);o2.connect(g);g.connect(actx.destination);
+  o1.start();o2.start(actx.currentTime+0.1);
+  o1.stop(actx.currentTime+0.6);o2.stop(actx.currentTime+0.6);
+ }catch{}
 }
 
 /* ---------- Data Engine ---------- */
@@ -429,10 +531,62 @@ async function fetchTd(sym,iv,size,endT){
  return j.values.map(v=>{let s=v.datetime;s=s.length<11?s+'T00:00:00Z':s.replace(' ','T')+'Z';return{t:Date.parse(s),o:+v.open,h:+v.high,l:+v.low,c:+v.close}});
 }
 
+function checkAlerts(b){
+ if(!alerts.length)return;
+ const curSym=normSym(S.src,S.sym);
+ const prevB=D.length>1?D[D.length-2]:null;
+
+ alerts.forEach(a=>{
+  if(a.triggered||normSym(a.src,a.sym)!==curSym)return;
+  
+  let targetP=a.price;
+  let prevTargetP=a.price;
+  
+  if(a.type==='trend'&&a.trend){
+   const dt=a.trend.t2-a.trend.t1;
+   if(dt!==0){
+    targetP=a.trend.p1+(a.trend.p2-a.trend.p1)*(b.t-a.trend.t1)/dt;
+    prevTargetP=prevB&&dt!==0?a.trend.p1+(a.trend.p2-a.trend.p1)*(prevB.t-a.trend.t1)/dt:targetP;
+   }else{
+    targetP=a.trend.p1;
+    prevTargetP=a.trend.p1;
+   }
+  }
+
+  let hit=false;
+  const cond=a.condition||'cross';
+  if(cond==='reach'){
+   hit=b.h>=targetP&&b.l<=targetP;
+  }else if(cond==='close_above'){
+   hit=b.c>targetP&&(prevB?prevB.c<=prevTargetP:true);
+  }else if(cond==='close_below'){
+   hit=b.c<targetP&&(prevB?prevB.c>=prevTargetP:true);
+  }else{ // 'cross'
+   if(prevB){
+    hit=(prevB.c<=prevTargetP&&b.c>=targetP)||
+        (prevB.c>=prevTargetP&&b.c<=targetP)||
+        (b.h>=targetP&&b.l<=targetP&&(prevB.c<prevTargetP||prevB.c>prevTargetP));
+   }else{
+    hit=b.h>=targetP&&b.l<=targetP;
+   }
+  }
+
+  if(hit){
+   a.triggered=true;
+   SV('alerts',alerts);
+   updateAlertsUI();
+   playChime();
+   status(`🔔 Alert: ${a.sym} ${a.note||fmt(targetP)}!`,0);
+   sched();
+  }
+ });
+}
+
 function upsert(b){
  const l=raw[raw.length-1];
  if(l&&l.t===b.t)raw[raw.length-1]=b;
  else if(!l||b.t>l.t)raw.push(b);
+ checkAlerts(b);
  if(!rb)rb=setTimeout(()=>{rb=0;rebuild();sched()},200);
 }
 
@@ -460,7 +614,7 @@ function rebuild(){
  applyView();
 }
 
-/* ---------- Fair Value Gap (FVG) Logic ---------- */
+/* ---------- Fair Value Gap (FVG) Logic (Reliable Timestamp Bounding) ---------- */
 function applyView(){
  D=rp&&!rp.pick?Dfull.slice(0,rp.n):Dfull;
  const n=D.length,k=Math.min(14,n);
@@ -473,12 +627,15 @@ function applyView(){
   if(c.l>a.h){up=1;top=c.l;bot=a.h} // Bullish gap
   else if(c.h<a.l){up=0;top=a.l;bot=c.h} // Bearish gap
   else continue;
-  if((top-bot)/c.c*100<cfg.fvgMin)continue;
-  let end=-1;
+  if((top-bot)/c.c*100<(cfg.fvgMin||0.01))continue;
+  let end=-1,endT=-1;
   for(let j=i+1;j<n;j++){
-   if(up?D[j].l<=bot:D[j].h>=top){end=j;break}
+   if(up?D[j].l<=bot:D[j].h>=top){
+    end=j;endT=D[j].t;break;
+   }
   }
-  fvgs.push({s:i-1,e:end,up,top,bot});
+  // Store exact timestamps so zooming and panning never desyncs FVG zones
+  fvgs.push({t:D[i-1].t,endT,e:end,up,top,bot});
  }
 }
 
@@ -498,7 +655,7 @@ async function load(){
   }
   if(my!==loadId)return;
   if(!raw.length)throw Error('No data for '+S.sym);
-  vShift=0;vZoom=1; // Reset view on new symbol load
+  vShift=0;vZoom=1;
   rebuild();off=6;bw=8;status('');sched();live(my,iv);
  }catch(e){
   if(my===loadId){
@@ -539,7 +696,8 @@ function setSym(src,sym,tf){
  S.src=src;S.sym=normSym(src,sym);
  if(tf)S.tf=tf;
  SV('S',S);
- $('src').value=S.src;$('sym').value=S.sym;
+ $('src').value=S.src;
+ $('sym-label').textContent=S.sym;
  drs=LS('dr:'+S.src+S.sym,[]);sel=null;draft=null;hist=[];redoS=[];
  exitRp();tfUI();wlRender();load();
 }
@@ -617,10 +775,46 @@ const snap=()=>{hist.push(JSON.stringify(drs));if(hist.length>100)hist.shift();r
 function undo(){if(!hist.length)return;redoS.push(JSON.stringify(drs));drs=JSON.parse(hist.pop());sel=null;draft=null;saveDr();sched()}
 function redo(){if(!redoS.length)return;hist.push(JSON.stringify(drs));drs=JSON.parse(redoS.pop());sel=null;draft=null;saveDr();sched()}
 
-// When a drawing is committed, keep the tool selected so user can draw multiple objects!
+// When a drawing is finished: switch to cursor and select it so user can edit it immediately!
 function commit(d){
- snap();d.id=Date.now()+Math.random();drs.push(d);sel=d;draft=null;saveDr();sched();
+ snap();d.id=Date.now()+Math.random();drs.push(d);
+ sel=d;draft=null;
+ setTool('cursor'); // Reselect cursor so user can edit right away!
+ updateDrMenu();
+ saveDr();sched();
 }
+
+function updateDrMenu(){
+ if(sel&&(sel.type==='hline'||sel.type==='hray'||sel.type==='trend')){
+  const P=sel.pts.map(q=>[X(q.t),Y(q.p)]);
+  const mx=P.length>1?(P[0][0]+P[1][0])/2:P[0][0];
+  const my=P.length>1?(P[0][1]+P[1][1])/2:P[0][1];
+  $('dr-menu').style.left=Math.max(10,Math.min(pw-140,mx-60))+'px';
+  $('dr-menu').style.top=Math.max(10,my-36)+'px';
+  $('dr-menu').hidden=false;
+ }else{
+  $('dr-menu').hidden=true;
+ }
+}
+
+$('dr-alert').onclick=()=>{
+ if(!sel)return;
+ if(sel.type==='trend'){
+  openCreateAlert({
+   type:'trend',
+   trend:{t1:sel.pts[0].t,p1:sel.pts[0].p,t2:sel.pts[1].t,p2:sel.pts[1].p}
+  });
+ }else{
+  openCreateAlert({type:'price',price:sel.pts[0].p});
+ }
+ $('dr-menu').hidden=true;
+};
+$('dr-del').onclick=()=>{
+ if(!sel)return;
+ snap();drs=drs.filter(d=>d!==sel);sel=null;
+ $('dr-menu').hidden=true;
+ saveDr();sched();
+};
 
 function finishPoly(){
  if(!draft||draft.type!=='poly')return;
@@ -654,7 +848,7 @@ function draw(){
  for(let i=i0;i<=i1;i++){const b=D[i];if(b.l<l)l=b.l;if(b.h>h)h=b.h}
  if(!isFinite(l)||l===h){l=D[n-1].c*.99;h=D[n-1].c*1.01}
  
- // Generous TradingView-style vertical margin padding (16%)
+ // TradingView-style vertical scaling & padding
  const span=(h-l);
  const pad=span*0.16;
  const mid=(h+l)/2;
@@ -675,22 +869,48 @@ function draw(){
  }
  ctx.stroke();
 
- // Fair Value Gaps (FVG)
- if(cfg.fvgOn){
+ // Fair Value Gaps (FVG) - Timestamp Bounded
+ if(cfg.fvgOn&&fvgs&&fvgs.length){
   const list=[...fvgs.filter(f=>f.e<0).slice(-cfg.fvgMax)];
   if(cfg.fvgMit)list.push(...fvgs.filter(f=>f.e>=0).slice(-cfg.fvgMax));
   for(const f of list){
-   const x1=Math.max(0,xAt(f.s)-bw/2);
-   const x2=f.e<0?pw:Math.min(pw,xAt(f.e));
-   const y1=yAt(f.top),y2=yAt(f.bot);
-   const boxH=Math.abs(y2-y1),topY=Math.min(y1,y2);
+   const x1=Math.max(0,X(f.t)-bw/2);
+   const x2=f.endT<0?pw:Math.min(pw,X(f.endT)+bw/2);
+   const y1=Y(f.top),y2=Y(f.bot);
+   const boxH=Math.max(2,Math.abs(y2-y1)),topY=Math.min(y1,y2);
    if(x2<0||x1>pw)continue;
-   ctx.fillStyle=rgba(f.up?cfg.fvgUp:cfg.fvgDn,f.e<0?cfg.fvgOp:cfg.fvgOp*.4);
+   ctx.fillStyle=rgba(f.up?cfg.fvgUp:cfg.fvgDn,f.e<0?cfg.fvgOp:cfg.fvgOp*.35);
    ctx.fillRect(x1,topY,x2-x1,boxH);
    ctx.strokeStyle=f.up?cfg.fvgUp:cfg.fvgDn;
    ctx.lineWidth=1;
    ctx.strokeRect(x1,topY,x2-x1,boxH);
   }
+ }
+
+ // Active Alerts (Dashed gold lines & badges on chart/axis)
+ if(alerts.length){
+  alerts.forEach(a=>{
+   if(a.triggered||normSym(a.src,a.sym)!==normSym(S.src,S.sym))return;
+   if(a.type==='trend'&&a.trend){
+    const midT=(a.trend.t1+a.trend.t2)/2;
+    const dt=a.trend.t2-a.trend.t1;
+    const midP=dt!==0?a.trend.p1+(a.trend.p2-a.trend.p1)*0.5:a.trend.p1;
+    const ax=X(midT),ay=Y(midP);
+    if(ax>=0&&ax<=pw&&ay>=0&&ay<=ph){
+     ctx.fillStyle='#f59e0b';ctx.beginPath();ctx.arc(ax,ay-12,8,0,7);ctx.fill();
+     ctx.fillStyle='#000';ctx.font='10px sans-serif';ctx.textAlign='center';ctx.fillText('🔔',ax,ay-8);
+    }
+   }else if(a.price!=null){
+    const ay=Y(a.price);
+    if(ay>=0&&ay<=ph){
+     ctx.strokeStyle='#f59e0b';ctx.lineWidth=1;ctx.setLineDash([4,4]);ctx.beginPath();
+     ctx.moveTo(0,Math.round(ay)+.5);ctx.lineTo(pw,Math.round(ay)+.5);ctx.stroke();ctx.setLineDash([]);
+     ctx.fillStyle='#f59e0b';ctx.fillRect(pw,ay-8,AX,16);
+     ctx.fillStyle='#000';ctx.font='10px system-ui';ctx.textAlign='left';
+     ctx.fillText('🔔 '+fmt(a.price),pw+4,ay+4);
+    }
+   }
+  });
  }
 
  // Candlesticks
@@ -712,7 +932,7 @@ function draw(){
 
  // Price axis labels
  ctx.fillStyle='#9aa3b2';ctx.font='11px system-ui';ctx.textAlign='left';
- for(let p=Math.ceil(lo/yStep)*yStep;p<=hi;p+=yStep){ctx.fillText(fmt(p),pw+5,Y(p)+4)}
+ for(let p=Math.ceil(lo/yStep)*yStep;p<=hi;p+=yStep){ctx.fillText(fmt(p),pw+6,Y(p)+4)}
 
  // Time axis labels
  ctx.textAlign='center';
@@ -725,37 +945,65 @@ function draw(){
  }
 
  // Precision Crosshair (Centered directly under mouse cursor)
- if(m&&m.x>=0&&m.x<pw&&m.y>=0&&m.y<ph){
+ if(m&&m.y>=0&&m.y<ph){
+  const isOverChart=m.x>=0&&m.x<pw;
   ctx.strokeStyle='#4a5568';ctx.lineWidth=1;ctx.setLineDash([3,3]);ctx.beginPath();
   ctx.moveTo(0,Math.round(m.y)+.5);ctx.lineTo(pw,Math.round(m.y)+.5);
-  ctx.moveTo(Math.round(m.x)+.5,0);ctx.lineTo(Math.round(m.x)+.5,ph);
+  if(isOverChart){
+   ctx.moveTo(Math.round(m.x)+.5,0);ctx.lineTo(Math.round(m.x)+.5,ph);
+  }
   ctx.stroke();ctx.setLineDash([]);
   
-  // Price tag
-  const p=pAt(m.y);ctx.fillStyle='#2962ff';ctx.fillRect(pw,m.y-10,AX,20);ctx.fillStyle='#fff';ctx.textAlign='left';ctx.fillText(fmt(p),pw+5,m.y+4);
+  // Price tag on price axis
+  const p=pAt(m.y);
+  ctx.fillStyle='#2962ff';ctx.fillRect(pw,m.y-10,AX,20);
+  ctx.fillStyle='#fff';ctx.textAlign='left';ctx.fillText(fmt(p),pw+22,m.y+4);
+  
+  // (+) Icon on price axis / at end of horizontal line (TradingView UI)
+  ctx.beginPath();ctx.arc(pw+10,m.y,7,0,7);ctx.fillStyle='#1e2638';ctx.fill();
+  ctx.strokeStyle='#fff';ctx.lineWidth=1.5;ctx.stroke();
+  ctx.beginPath();ctx.moveTo(pw+7,m.y);ctx.lineTo(pw+13,m.y);ctx.moveTo(pw+10,m.y-3);ctx.lineTo(pw+10,m.y+3);ctx.stroke();
   
   // Time tag & OHLC
-  const curI=Math.round(idxAt(m.x));
-  if(curI>=0&&curI<n){
-   const b=D[curI],d=new Date(b.t),s=d.toLocaleString([],{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
-   ctx.fillRect(m.x-45,ph,90,18);ctx.fillStyle='#fff';ctx.textAlign='center';ctx.fillText(s,m.x,ph+13);
-   $('ohlc').innerHTML=`<span style="color:#fff;font-weight:600">${S.sym} · ${S.tf}</span> O:${fmt(b.o)} H:${fmt(b.h)} L:${fmt(b.l)} C:${fmt(b.c)} <span style="color:${b.c>=b.o?'#26a69a':'#ef5350'}">${((b.c-b.o)/b.o*100).toFixed(2)}%</span>`;
-  }
+  if(isOverChart){
+   const curI=Math.round(idxAt(m.x));
+   if(curI>=0&&curI<n){
+    const b=D[curI],d=new Date(b.t),s=d.toLocaleString([],{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+    ctx.fillRect(m.x-45,ph,90,18);ctx.fillStyle='#fff';ctx.textAlign='center';ctx.fillText(s,m.x,ph+13);
+    $('ohlc').innerHTML=`<span style="color:#fff;font-weight:600">${S.sym} · ${S.tf}</span> O:${fmt(b.o)} H:${fmt(b.h)} L:${fmt(b.l)} C:${fmt(b.c)} <span style="color:${b.c>=b.o?'#26a69a':'#ef5350'}">${((b.c-b.o)/b.o*100).toFixed(2)}%</span>`;
+   }
 
-  // Magnet snap target indicator (shows anchor without shifting the crosshair)
-  if(magnetOn){
-   const sn=getSnapped(m.x,m.y);
-   if(sn.snapped){
-    ctx.beginPath();ctx.arc(sn.x,sn.y,4,0,7);ctx.fillStyle='#00e676';ctx.fill();
-    ctx.strokeStyle='#fff';ctx.lineWidth=1.5;ctx.stroke();
+   // Magnet target snap ring (shows target on candle without warping crosshair!)
+   if(magnetOn){
+    const sn=getSnapped(m.x,m.y);
+    if(sn.snapped){
+     ctx.beginPath();ctx.arc(sn.x,sn.y,4,0,7);ctx.fillStyle='#00e676';ctx.fill();
+     ctx.strokeStyle='#fff';ctx.lineWidth=1.5;ctx.stroke();
+    }
    }
   }
  }
 
- // Last price tag on axis
+ // Last price tag and Bar Close Countdown (TradingView UI)
  const curB=D[n-1];
  if(curB){
-  const y=Y(curB.c);ctx.fillStyle=curB.c>=curB.o?'#26a69a':'#ef5350';ctx.fillRect(pw,y-10,AX,20);ctx.fillStyle='#fff';ctx.textAlign='left';ctx.fillText(fmt(curB.c),pw+5,y+4);
+  const y=Y(curB.c);
+  ctx.fillStyle=curB.c>=curB.o?'#26a69a':'#ef5350';ctx.fillRect(pw,y-10,AX,20);
+  ctx.fillStyle='#fff';ctx.textAlign='left';ctx.fillText(fmt(curB.c),pw+6,y+4);
+  
+  // Bar countdown (HH:MM:SS remaining until candle closes)
+  const nextBarT=curB.t+tfms;
+  const remMs=Math.max(0,nextBarT-Date.now());
+  const remSec=Math.floor(remMs/1000);
+  const hrs=Math.floor(remSec/3600);
+  const mins=Math.floor((remSec%3600)/60);
+  const secs=remSec%60;
+  const cdStr=(hrs>0?String(hrs).padStart(2,'0')+':':'')+String(mins).padStart(2,'0')+':'+String(secs).padStart(2,'0');
+  
+  ctx.fillStyle='#1c2330';ctx.fillRect(pw+1,y+11,AX-2,15);
+  ctx.strokeStyle='#2a3342';ctx.strokeRect(pw+1,y+11,AX-2,15);
+  ctx.fillStyle='#9aa3b2';ctx.font='10px system-ui';ctx.textAlign='center';
+  ctx.fillText(cdStr,pw+AX/2,y+22);
  }
 }
 
@@ -764,6 +1012,74 @@ const pos=e=>{
  const r=cv.getBoundingClientRect();
  return[e.clientX-r.left,e.clientY-r.top];
 };
+
+function snapAnglePoint(x,y,shiftKey){
+ if((angleSnapOn||shiftKey)&&draft&&draft.type==='trend'&&draft.sx!=null){
+  const dx=x-draft.sx,dy=y-draft.sy;
+  const r=Math.hypot(dx,dy);
+  if(r>=3){
+   const theta=Math.atan2(dy,dx);
+   const snapRad=Math.round(theta/(Math.PI/4))*(Math.PI/4);
+   return[draft.sx+r*Math.cos(snapRad),draft.sy+r*Math.sin(snapRad)];
+  }
+ }
+ return[x,y];
+}
+
+let pendingAlert=null;
+function openCreateAlert(opt){
+ pendingAlert=opt;
+ $('create-alert-modal').hidden=false;
+ const isTrend=opt.type==='trend';
+ $('ca-title').textContent=isTrend?`🔔 Create Trendline Alert (${S.sym})`:`🔔 Create Alert at ${fmt(opt.price)}`;
+ $('ca-cond').value='cross';
+ $('ca-price-row').style.display=isTrend?'none':'block';
+ if(!isTrend)$('ca-price').value=opt.price;
+ $('ca-msg').value=`${S.sym} ${isTrend?'Trendline':fmt(opt.price)} Crossing`;
+ setTimeout(()=>$('ca-msg').focus(),50);
+}
+
+function saveCreatedAlert(){
+ if(!pendingAlert)return;
+ const cond=$('ca-cond').value;
+ const msg=$('ca-msg').value.trim();
+ const isTrend=pendingAlert.type==='trend';
+ const price=isTrend?0:+$('ca-price').value;
+ const alertObj={
+  id:Date.now(),
+  sym:S.sym,
+  src:S.src,
+  type:pendingAlert.type,
+  condition:cond,
+  price:price,
+  trend:isTrend?pendingAlert.trend:null,
+  note:msg||(isTrend?`${S.sym} Trendline ${cond}`:`${S.sym} ${fmt(price)} ${cond}`),
+  triggered:false,
+  time:Date.now()
+ };
+ alerts.push(alertObj);
+ SV('alerts',alerts);
+ updateAlertsUI();
+ playChime();
+ status(`Alert created for ${S.sym}!`);
+ setTimeout(()=>status(''),2500);
+ $('create-alert-modal').hidden=true;
+ pendingAlert=null;
+ sched();
+}
+
+$('ca-save').onclick=saveCreatedAlert;
+$('ca-cancel').onclick=$('ca-close').onclick=()=>{ $('create-alert-modal').hidden=true;pendingAlert=null; };
+$('create-alert-modal').onclick=e=>{if(e.target.id==='create-alert-modal'){$('create-alert-modal').hidden=true;pendingAlert=null;}};
+
+function addAlert(price,note=''){
+ openCreateAlert({type:'price',price:+price,note});
+}
+
+function updateAlertsUI(){
+ const active=alerts.filter(a=>!a.triggered);
+ $('alert-cnt').textContent=active.length;
+}
 
 cv.onpointerdown=e=>{
  cv.setPointerCapture(e.pointerId);
@@ -776,11 +1092,24 @@ cv.onpointerdown=e=>{
  if(!D.length)return;
  down={x,y};
 
+ // Click on (+) button on price axis / crosshair line to create Alert
+ if(m&&Math.abs(y-m.y)<=14&&(x>=pw-12&&x<=pw+25)){
+  openCreateAlert({type:'price',price:pAt(m.y)});
+  return;
+ }
+
  // Dragging on price axis scales price vertically (TradingView feature)
  if(x>=pw&&y<ph){
   drag={type:'vscale',y0:y,shift0:vShift,zoom0:vZoom};
   return;
  }
+
+ // Dragging on time axis stretches / zooms time horizontally!
+ if(y>=ph&&x<pw){
+  drag={type:'hscale',x0:x,bw0:bw,off0:off};
+  return;
+ }
+
  if(x>pw||y>ph)return;
 
  if(rp&&rp.pick){
@@ -801,7 +1130,11 @@ cv.onpointerdown=e=>{
    else{draft.pts[draft.pts.length-1]=p;draft.pts.push({...p})};
   }else{
    if(!draft)draft={type:tool,pts:[p,{...p}],w:dw,color:dcol,sx:x,sy:y};
-   else{draft.pts[1]=p;commit(draft)};
+   else{
+    const[tx,ty]=snapAnglePoint(x,y,e.shiftKey);
+    draft.pts[1]=pt(tx,ty);
+    commit(draft);
+   }
   }
   sched();return;
  }
@@ -819,8 +1152,10 @@ cv.onpointerdown=e=>{
   sel=h;
   drag={type:'move',i0:idxAt(x),p0:pAt(y),orig:JSON.parse(JSON.stringify(h))};
   $('w').value=h.w+'px';$('col').value=h.color;
+  updateDrMenu();
  }else{
   sel=null;
+  $('dr-menu').hidden=true;
   // Dragging chart allows BOTH horizontal and vertical panning!
   drag={type:'pan',off,vShift};
  }
@@ -838,14 +1173,7 @@ cv.onpointermove=e=>{
  }
 
  if(draft){
-  let targetX=x,targetY=y;
-  if((angleSnapOn||e.shiftKey)&&draft.type==='trend'&&draft.sx!=null){
-   const dx=x-draft.sx,dy=y-draft.sy;
-   const deg=Math.atan2(dy,dx)*180/Math.PI;
-   if(Math.abs(deg)<22.5||Math.abs(deg)>157.5){targetY=draft.sy}
-   else if(Math.abs(Math.abs(deg)-45)<15){targetY=draft.sy+Math.sign(dy)*Math.abs(dx)}
-   else if(Math.abs(Math.abs(deg)-90)<15){targetX=draft.sx}
-  }
+  const[targetX,targetY]=snapAnglePoint(x,y,e.shiftKey);
   draft.pts[draft.pts.length-1]=pt(targetX,targetY);
  }
 
@@ -859,6 +1187,7 @@ cv.onpointermove=e=>{
   else if(sel.s!=null&&k===1){sel.pts[1]={t,p:sel.pts[0].p}}
   else if(sel.s!=null&&k===0){sel.pts[0]={t,p};sel.pts[1].p=p}
   else sel.pts[k]={t,p};
+  updateDrMenu();
  }
  // Dragging the whole drawing
  else if(drag&&drag.type==='move'){
@@ -866,11 +1195,17 @@ cv.onpointermove=e=>{
   const di=idxAt(x)-drag.i0,dp=pAt(y)-drag.p0;
   sel.pts=drag.orig.pts.map(q=>({t:tOf(idxOf(q.t)+di),p:q.p+dp}));
   if(sel.s!=null){sel.s=drag.orig.s+dp;sel.tg=drag.orig.tg+dp}
+  updateDrMenu();
  }
  // Vertical scale zoom on price axis
  else if(drag&&drag.type==='vscale'){
   const dy=y-drag.y0;
-  vZoom=Math.max(0.2,Math.min(5,drag.zoom0*Math.exp(dy*0.006)));
+  vZoom=Math.max(0.15,Math.min(8,drag.zoom0*Math.exp(dy*0.007)));
+ }
+ // Horizontal scale zoom by dragging time axis
+ else if(drag&&drag.type==='hscale'){
+  const dx=x-drag.x0;
+  bw=Math.max(1.5,Math.min(60,drag.bw0*Math.exp(dx*0.005)));
  }
  // Two-way chart panning (both horizontal and vertical!)
  else if(drag&&drag.type==='pan'){
@@ -887,27 +1222,37 @@ cv.onpointerup=e=>{
  if(draft&&draft.sx!=null){
   const[x,y]=pos(e);
   if(Math.hypot(x-draft.sx,y-draft.sy)>6){
-   draft.pts[1]=pt(x,y);commit(draft);
+   const[targetX,targetY]=snapAnglePoint(x,y,e.shiftKey);
+   draft.pts[1]=pt(targetX,targetY);
+   commit(draft);
   }
  }
- if(drag&&drag.type!=='pan'&&drag.type!=='vscale')saveDr();
+ if(drag&&drag.type!=='pan'&&drag.type!=='vscale'&&drag.type!=='hscale')saveDr();
  drag=null;
 };
 
 // Double-click resets vertical shift and scale (auto-fit price)
 cv.ondblclick=e=>{
- const[x]=pos(e);
- if(x>=pw){vShift=0;vZoom=1;sched();return}
+ const[x,y]=pos(e);
+ if(x>=pw||y>=ph){vShift=0;vZoom=1;sched();return}
  finishPoly();
 };
 
 cv.onmouseleave=()=>{m=null;$('ohlc').innerHTML='';sched()};
 
+// TradingView wheel controls:
+// Vertical wheel (e.deltaY) scales price axis (vZoom)
+// Horizontal wheel or Shift+Wheel scales horizontal time (bw)
 cv.addEventListener('wheel',e=>{
  e.preventDefault();if(!D.length)return;
- const[x]=pos(e),idx=idxAt(x);
- bw=Math.max(1.5,Math.min(60,bw*Math.exp(-e.deltaY*.0012)));
- off=idx-(x-pw)/bw-(D.length-1);
+ if(e.shiftKey||Math.abs(e.deltaX)>Math.abs(e.deltaY)){
+  const dX=e.shiftKey?e.deltaY:e.deltaX;
+  const[x]=pos(e),idx=idxAt(x);
+  bw=Math.max(1.5,Math.min(60,bw*Math.exp(-dX*0.0015)));
+  off=idx-(x-pw)/bw-(D.length-1);
+ }else{
+  vZoom=Math.max(0.15,Math.min(8,vZoom*Math.exp(e.deltaY*0.0012)));
+ }
  sched();
 },{passive:false});
 
@@ -923,11 +1268,15 @@ addEventListener('keydown',e=>{
  }
  if(e.key==='Escape'){
   draft=null;setTool('cursor');sel=null;sched();
-  $('sym-search-dropdown').hidden=true;
+  $('search-modal').hidden=true;
+  $('alerts-modal').hidden=true;
+  $('dr-menu').hidden=true;
  }
  else if(e.key==='Enter')finishPoly();
  else if((e.key==='Delete'||e.key==='Backspace')&&sel){
-  snap();drs=drs.filter(d=>d!==sel);sel=null;saveDr();sched();
+  snap();drs=drs.filter(d=>d!==sel);sel=null;
+  $('dr-menu').hidden=true;
+  saveDr();sched();
  }
 });
 
@@ -955,7 +1304,7 @@ function renderToolsUI(){
  `<button id="magnet" class="${magnetOn?'on':''}" title="Magnet Mode (Snaps drawings to OHLC)">
    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4v7a8 8 0 0 0 16 0V4"/><line x1="4" y1="8" x2="8" y2="8"/><line x1="16" y1="8" x2="20" y2="8"/></svg>
   </button>`+
- `<button id="angle" class="${angleSnapOn?'on':''}" title="Angle Snap (Locks horizontal/45° trendlines)">
+ `<button id="angle" class="${angleSnapOn?'on':''}" title="Angle Snap (Locks 0°, 45°, 90° trendlines)">
    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20h16"/><path d="M4 20L18 6"/><path d="M12 20a8 8 0 0 0-4-6.93"/></svg>
   </button>`+
  `<div class="sep"></div>`+
@@ -975,18 +1324,18 @@ function renderToolsUI(){
  };
  $('angle').onclick=()=>{
   angleSnapOn=!angleSnapOn;SV('angleSnapOn',angleSnapOn);$('angle').classList.toggle('on',angleSnapOn);
-  status(angleSnapOn?'Angle Snap ON':'Angle Snap OFF');setTimeout(()=>status(''),2000);
+  status(angleSnapOn?'Angle Snap ON (0°, 45°, 90°)':'Angle Snap OFF');setTimeout(()=>status(''),2000);
  };
  $('w').onchange=e=>{dw=+e.target.value.replace('px','');if(sel){snap();sel.w=dw;saveDr();sched()}};
  $('col').oninput=e=>{dcol=e.target.value;if(sel){if(!cs){snap();cs=1}sel.color=dcol;saveDr();sched()}};
  $('col').onchange=()=>{cs=0};
  $('und').onclick=undo;
  $('red').onclick=redo;
- $('del').onclick=()=>{if(sel){snap();drs=drs.filter(d=>d!==sel);sel=null;saveDr();sched()}};
+ $('del').onclick=()=>{if(sel){snap();drs=drs.filter(d=>d!==sel);sel=null;$('dr-menu').hidden=true;saveDr();sched()}};
  
  // Clear drawings WITHOUT disabling future drawings!
  $('clr').onclick=()=>{
-  snap();drs=[];sel=null;draft=null;drag=null;saveDr();
+  snap();drs=[];sel=null;draft=null;drag=null;$('dr-menu').hidden=true;saveDr();
   status('All drawings cleared');setTimeout(()=>status(''),2000);
   sched();
  };
@@ -999,7 +1348,17 @@ function tfUI(){
 $('tfs').onclick=e=>{const b=e.target.closest('[data-tf]');if(b){S.tf=b.dataset.tf;SV('S',S);tfUI();load()}};
 $('ctf').onkeydown=e=>{if(e.key==='Enter'){const p=tfParse($('ctf').value);if(!p){status('Use a number + m, h, d, w or M (e.g. 7m, 3h, 2d)',1);return}S.tf=p.label;SV('S',S);tfUI();load()}};
 
-/* ---------- Symbol Autocomplete & Search Dropdown ---------- */
+// Quick FVG Toggle Button in Header
+$('fvgtog').onclick=()=>{
+ cfg.fvgOn=!cfg.fvgOn;
+ SV('cfg',cfg);
+ $('fvgtog').classList.toggle('on',cfg.fvgOn);
+ status(cfg.fvgOn?'FVG Enabled':'FVG Disabled');
+ setTimeout(()=>status(''),2000);
+ sched();
+};
+
+/* ---------- Symbol Autocomplete & Search Modal (Fixed Position) ---------- */
 let curCat='all';
 
 function renderSearchResults(query=''){
@@ -1013,7 +1372,7 @@ function renderSearchResults(query=''){
  });
  
  if(!filtered.length){
-  $('search-results').innerHTML=`<div style="padding:16px;text-align:center;color:#6b7280">No presets found. Press Enter to load "<b>${query.toUpperCase()}</b>" directly.</div>`;
+  $('search-results').innerHTML=`<div style="padding:16px;text-align:center;color:#8a919e">No preset found. Press Enter to load <b>"${query.toUpperCase()}"</b> directly.</div>`;
   return;
  }
  
@@ -1024,7 +1383,7 @@ function renderSearchResults(query=''){
   return `
   <div class="s-item" data-sym="${displaySym}" data-src="${isFx?'fx':src}">
    ${symBadge(displaySym,src)}
-   <div style="display:flex;flex-direction:column">
+   <div style="display:flex;flex-direction:column;flex:1">
     <span class="s-sym">${displaySym}</span>
     <span class="s-desc">${p.name}</span>
    </div>
@@ -1034,12 +1393,15 @@ function renderSearchResults(query=''){
  }).join('');
 }
 
-$('sym').onclick=()=>{
- $('sym-search-dropdown').hidden=false;
+$('sym-btn').onclick=()=>{
+ $('search-modal').hidden=false;
  $('search-input').value='';
  renderSearchResults('');
  setTimeout(()=>$('search-input').focus(),50);
 };
+
+$('search-close').onclick=()=>$('search-modal').hidden=true;
+$('search-modal').onclick=e=>{if(e.target.id==='search-modal')$('search-modal').hidden=true};
 
 $('search-input').oninput=e=>renderSearchResults(e.target.value);
 $('search-input').onkeydown=e=>{
@@ -1051,7 +1413,7 @@ $('search-input').onkeydown=e=>{
     first.click();
    }else{
     setSym(S.src,val);
-    $('sym-search-dropdown').hidden=true;
+    $('search-modal').hidden=true;
    }
   }
  }
@@ -1072,21 +1434,49 @@ $('search-results').onclick=e=>{
  if(item){
   const sym=item.dataset.sym;
   const src=item.dataset.src;
-  $('sym-search-dropdown').hidden=true;
+  $('search-modal').hidden=true;
   setSym(src,sym);
  }
 };
 
-// Close search when clicking outside
-document.addEventListener('click',e=>{
- if(!e.target.closest('#sym-box')){
-  $('sym-search-dropdown').hidden=true;
- }
-});
-
 $('src').onchange=()=>{
  const v=$('src').value;
  setSym(v,v==='gate'?'BTC_USDT':v==='bn'?'BTCUSDT':'EUR/USD');
+};
+
+/* ---------- Alerts Modal & Management ---------- */
+$('alert-btn').onclick=()=>{
+ renderAlertsList();
+ $('alerts-modal').hidden=false;
+};
+$('alerts-close').onclick=()=>$('alerts-modal').hidden=true;
+$('alerts-modal').onclick=e=>{if(e.target.id==='alerts-modal')$('alerts-modal').hidden=true};
+
+function renderAlertsList(){
+ if(!alerts.length){
+  $('alerts-list').innerHTML='<div style="padding:20px;text-align:center;color:#8a919e">No price alerts set. Click the (+) button on the price crosshair or select a line to add one!</div>';
+  return;
+ }
+ $('alerts-list').innerHTML=alerts.map((a,i)=>`
+  <div class="alert-row">
+   <span class="a-sym">${a.sym}</span>
+   <span class="a-price">${a.type==='trend'?'Trendline':fmt(a.price)}</span>
+   <span style="font-size:10px;padding:2px 4px;border-radius:3px;background:#202838;color:#9aa3b2;text-transform:capitalize">${(a.condition||'cross').replace('_',' ')}</span>
+   <span class="a-note">${a.triggered?'<span style="color:#ef5350;font-weight:600">TRIGGERED</span>':a.note}</span>
+   <button data-del="${i}" style="padding:2px 6px;font-size:11px">✕</button>
+  </div>
+ `).join('');
+}
+
+$('alerts-list').onclick=e=>{
+ const b=e.target.closest('[data-del]');
+ if(b){
+  alerts.splice(+b.dataset.del,1);
+  SV('alerts',alerts);
+  updateAlertsUI();
+  renderAlertsList();
+  sched();
+ }
 };
 
 /* ---------- Settings Modal ---------- */
@@ -1111,6 +1501,7 @@ document.querySelectorAll('#setbody [data-k]').forEach(i=>{
  i.onchange=i.oninput=()=>{
   cfg[k]=i.type==='checkbox'?i.checked:(i.type==='number'||i.type==='range')?+i.value:i.value;
   SV('cfg',cfg);
+  if(k==='fvgOn')$('fvgtog').classList.toggle('on',cfg.fvgOn);
   if(k==='key'){if(S.src==='fx')load()}else{rebuild();sched()}
  };
 });
@@ -1206,6 +1597,11 @@ $('wnew').onclick=()=>{
 
 setInterval(wlPrices,15000);
 
+// 1-second ticker for Candle Countdown and Clock
+setInterval(()=>{
+ if(D.length)sched();
+},1000);
+
 // Watchlist toggle
 $('wtog').onclick=()=>{
  if(window.innerWidth>700){
@@ -1252,6 +1648,8 @@ function resize(){
 
 addEventListener('resize',resize);
 renderToolsUI();
+updateAlertsUI();
+$('fvgtog').classList.toggle('on',cfg.fvgOn);
 resize();
 setTool('cursor');
 wlRender();
