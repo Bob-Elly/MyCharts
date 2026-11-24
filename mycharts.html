@@ -948,9 +948,6 @@ function draw(){
    const op=f.e<0?Math.min(0.18,baseOp):Math.min(0.08,baseOp*0.35);
    ctx.fillStyle=rgba(f.up?cfg.fvgUp:cfg.fvgDn,op);
    ctx.fillRect(x1,topY,x2-x1,boxH);
-   ctx.strokeStyle=rgba(f.up?cfg.fvgUp:cfg.fvgDn,Math.min(0.35,op*1.8));
-   ctx.lineWidth=1;
-   ctx.strokeRect(x1+.5,topY+.5,x2-x1,boxH);
   }
  }
 
